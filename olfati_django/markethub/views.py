@@ -2,8 +2,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from markethub.models import MarketHubModel
-from markethub.serializer import MarketHubSerializer
+from markethub.models import MarketHubModel,Payment,MarketHubQuestionModel
+from markethub.serializer import MarketHubSerializer,MarketHubQuestionSerializer
+from markethub.permissions import HasPurchasedAccess, IsAuthenticated
+from django.shortcuts import get_object_or_404
+ 
 
 
 class MarketHubListView(APIView):
@@ -38,3 +41,26 @@ class MarketHubView(APIView):
         data = MarketHubModel.objects.get(pk=pk)
         data.delete()
         return Response(status=status.HTTP_204_NO_CONTENT) 
+    
+
+
+class QuestionView(APIView):
+        permission_classes = [IsAuthenticated,HasPurchasedAccess]
+        def get(self,request):
+            try:
+                payment = Payment.objects.get(user=request.user.id)
+            except Payment.DoesNotExist:
+                return Response('Purchase Question',status=403)
+            if payment.has_access :
+                data = get_object_or_404(MarketHubQuestionModel,payment=payment)
+                srz_data = MarketHubQuestionSerializer(instance=data)
+                return Response(srz_data.data)
+            
+            else:
+                return Response('purchaes question',status=403)
+
+
+            
+                
+
+
