@@ -35,7 +35,7 @@ class UserView(APIView):
                     return Response(response_data, status=status.HTTP_201_CREATED)
                 except IntegrityError:
                     return Response({'error': 'خطای دیگری رخ داد.'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'status': status.HTTP_400_BAD_REQUEST, 'message': serializer.errors})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         userData = UserModel.objects.all()
