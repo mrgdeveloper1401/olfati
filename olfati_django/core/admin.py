@@ -4,7 +4,8 @@ from django.contrib.admin.models import LogEntry
 from accounts.models import OtpModel, UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel
 from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel
-from markethub.models import MarketHubModel, MarketHubQuestionModel
+from markethub.models import MarketHubModel, MarketHubQuestionModel,Payment
+
 
 
 @admin.register(UserModel)
@@ -107,5 +108,7 @@ class LogEntryAdmin(admin.ModelAdmin):
     list_filter = ("action_flag", "content_type")
     search_fields = ("user__username",)
 
-#
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    pass
 # class UserAdmin(admin.ModelAdmin):

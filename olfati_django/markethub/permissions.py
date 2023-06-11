@@ -22,15 +22,11 @@ class IsAuthenticated(BasePermission):
 
 
 #پرمیشن برای چک کردن پرداخت کاربر
+
 class HasPurchasedAccess(BasePermission):
-    def has_permission(self, request,view):
-        if request.method in SAFE_METHODS and request.user.is_authenticated:
-         return True
-        try:
-            payment=Payment.objects.get(user=request.user.id)
-        except Payment.DoesNotExist:
-            return False
-        return getattr(payment,'has_access',True)
+    def has_object_permission(self, request,view):
+        return request.user.is_authenticated and request.user.Payment.has_access  
+    
 
 
 

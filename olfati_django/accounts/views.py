@@ -2,14 +2,12 @@ from sqlite3 import IntegrityError
 import codecs
 from datetime import timedelta, datetime
 from random import randint
-
 from django.utils import timezone
 from kavenegar import KavenegarAPI
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
 from .models import OtpModel, UserModel
 from .serializer import OtpSerializers, UserSerializers
 

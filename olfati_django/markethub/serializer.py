@@ -1,4 +1,4 @@
-from markethub.models import MarketHubModel, MarketHubQuestionModel
+from .models import MarketHubModel, MarketHubQuestionModel
 from rest_framework import serializers
 
 
@@ -6,7 +6,7 @@ from rest_framework import serializers
 class MarketHubSerializer(serializers.ModelSerializer):
     class Meta:
         model = MarketHubModel
-        fields = "__all__"
+        fields = ( 'title','description','cover_image', 'author', 'price','data_created')
 
 
 class MarketHubQuestionSerializer(serializers.ModelSerializer):
@@ -16,9 +16,16 @@ class MarketHubQuestionSerializer(serializers.ModelSerializer):
 
 
 # اگه پرداخت کرده بود
-class MarketHubPaidSerializer(serializers.ModelSerializer):
-    markethub_question = MarketHubQuestionSerializer(many=True)
 
+
+class MarketHubPaidSerializer(serializers.ModelSerializer):
+    question = MarketHubQuestionSerializer(many=True,read_only=True)
+    cover_image = serializers.ImageField(source="markethub.cover_image")
+    title = serializers.CharField(source="markethub.title")
+    description = serializers.CharField(source="markethub.description")
     class Meta:
-        model = MarketHubModel
-        fields = ('title', "data_created", 'cover_image', "markethub_question",)
+        model =MarketHubQuestionModel
+        fields ='__all__'
+
+
+
