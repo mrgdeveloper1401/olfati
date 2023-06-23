@@ -1,5 +1,4 @@
 from django.db import models
-
 from accounts.models import UserModel
 
 
@@ -25,7 +24,8 @@ class QuestionModel(models.Model):
 class ChoiceModel(models.Model):
     question = models.ForeignKey(QuestionModel, on_delete=models.CASCADE, related_name='choices')
     choice_text = models.CharField(max_length=500)
-    is_correct = models.BooleanField()
+    is_correct = models.BooleanField(default=False
+    )
 
     def __str__(self):
         return f"{self.question.question_text[:25]} | {self.choice_text[:20]}"
@@ -37,5 +37,7 @@ class KarNameModel(models.Model):
 
 
 class KarNameDBModel(models.Model):
-    question_id = models.ForeignKey(QuestionModel, on_delete=models.PROTECT, related_name="question_id")
-    choice_id = models.ForeignKey(ChoiceModel, on_delete=models.PROTECT, related_name="choice_id")
+    question = models.ForeignKey(QuestionModel, on_delete=models.PROTECT, related_name="question_id")
+    choice = models.ForeignKey(ChoiceModel, on_delete=models.PROTECT, related_name="choice_id", null= True)
+    karname = models.ForeignKey(KarNameModel, on_delete=models.PROTECT, related_name="karname")
+

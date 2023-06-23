@@ -1,26 +1,19 @@
 from rest_framework import serializers
 
 from .models import ExamModel, ChoiceModel, QuestionModel, KarNameModel, KarNameDBModel
-
-
-class KarNameDBlSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = KarNameDBModel
-        fields = "__all__"
-
-
-class KarNameSerializer(serializers.ModelSerializer):
-    questions = KarNameDBlSerializer(many=True)
-
-    class Meta:
-        model = KarNameModel
-        fields = ( "exam_id", "questions",)
-
+from accounts.serializer import UserSerializers
+from django.shortcuts import get_object_or_404
 
 class ChoiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChoiceModel
-        fields = ('id', 'choice_text', 'is_correct',)
+        fields = ('id','choice_text','is_correct')
+                              
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionModel
+        fields = ('question_text',)
+
 
 
 class ExamQuestionSerializer(serializers.ModelSerializer):
@@ -63,3 +56,68 @@ class ExamSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExamModel
         fields = "__all__"
+
+
+
+class KarNameDBMSerializer(serializers.ModelSerializer):
+    # choice = ChoiceSerializer(many=True)
+    # question = QuestionSerializer(many=True)
+    class Meta:
+        model = KarNameDBModel 
+        fields = ('question', 'choice',)
+
+
+#*******************************
+class KarNameSerializer(serializers.ModelSerializer):
+    user = UserSerializers()
+    exam_id = ExamDetailsSerializer()
+    class Meta:
+        model = KarNameModel
+        fields = '__all__'
+
+
+
+class TakeExamSerializer(serializers.ModelSerializer):
+    karname = KarNameDBMSerializer(KarNameDBModel.objects.all() ,many = True)
+    class Meta:
+        model = KarNameModel
+        fields = '__all__'
+
+    def create(self, validated_data):
+        user = self.context.get('request').user 
+        exam = ExamModel.objects.get(pk= self.context.get('exam'))
+        questions = []
+        karname = KarNameModel.objects.create(user= user, exam_id= exam)
+        for question_and_choice in validated_data['karname']:
+            question = question_and_choice['question']
+            if question.exam != karname.exam_id:
+                continue
+            questions.append(question.id)
+            choice = question_and_choice['choice']
+            if choice.question != question:
+                choice = None
+            KarNameDBModel.objects.create(karname=karname, question=question, choice=choice)
+        question_with_no_answer = exam.questions.exclude(id__in=questions)
+        for question in question_with_no_answer:
+            KarNameDBModel.objects.create(karname=karname, question=question, choice=None)
+        return karname
+    
+    def update(self, instance, validated_data):
+        karname = instance
+        for question_and_choice in validated_data['karname']:
+            question = question_and_choice['question']
+            if question.exam != karname.exam_id:
+                continue
+            choice = question_and_choice['choice']
+            if choice.question != question:
+                choice = None
+            answered = KarNameDBModel.objects.get(question=question, karname=karname)
+            answered.choice = choice
+            answered.save() 
+        return karname    
+
+       
+
+
+
+
