@@ -36,7 +36,7 @@ class LitnerView(APIView):
             return Response({"massage": "آزمون حذف شد"}, status.HTTP_204_NO_CONTENT)
         except Exception:
             return Response(
-                {"status": status.HTTP_404_NOT_FOUND, "massage": "آزمون یافت نشد"}, status.HTTP_404_NOT_FOUND)
+                {"massage": "آزمون یافت نشد"}, status.HTTP_404_NOT_FOUND)
 
     def put(self, request):
         pass
