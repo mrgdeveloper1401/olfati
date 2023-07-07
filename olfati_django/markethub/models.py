@@ -30,3 +30,39 @@ class MarketHubQuestionModel(models.Model):
     markethub = models.ForeignKey(MarketHubModel, on_delete=models.CASCADE, related_name='markethub')
     question_text = models.CharField(max_length=150)
     answers_text = models.CharField(max_length=100)
+
+
+
+
+
+class MarketHubKarNameModel(models.Model):
+    exam_id = models.OneToOneField(MarketHubModel, on_delete=models.CASCADE, related_name='exam_id')
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE,)
+
+
+
+
+
+
+class MarketHubAnswer(models.Model):
+ #   ANSWER_TYPE = (
+     #   ("N", "No Answer"),
+     #   ("F", "False Answer"),
+   #    ("T", "True Answer"),
+   # )
+
+    karname = models.ForeignKey(MarketHubKarNameModel, on_delete=models.PROTECT, related_name="litner_azmon")
+    question = models.ForeignKey(MarketHubQuestionModel, on_delete=models.PROTECT, )
+    is_correct = models.BooleanField(default=False)
+   # type = models.CharField(max_length=1, choices=ANSWER_TYPE)
+
+
+
+
+
+class MarketHubKarNameDBModel(models.Model):
+    question = models.ForeignKey(MarketHubQuestionModel,on_delete=models.PROTECT,related_name='question_id')
+    is_correct = models.BooleanField(null=True)
+    karname = models.ForeignKey(MarketHubKarNameModel,on_delete=models.PROTECT,related_name="karname")
+
+

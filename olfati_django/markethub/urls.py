@@ -5,6 +5,7 @@ urlpatterns = [
 #class Markethub
     path("", MarketHubListView.as_view()),
     path("<int:pk>", MarketHubListView.as_view()),
+    path("list/<int:pk>", MarketHubListView.as_view()),
     path('MarketHubQuestionPaid/<int:pk>',MarketHubListView.as_view()),
   
     path('update/<int:pk>', MarketHubView.as_view()),
