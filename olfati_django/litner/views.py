@@ -1,14 +1,14 @@
-from litner.models import LitnerModel, LitnerKarNameModel
-from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerKarNameSerializer
+from litner.models import LitnerModel, LitnerKarNameModel,LitnerKarNameDBModel
+from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerKarNameSerializer,LitneKarnameDBSerializer,LitnerTakeExamSerializer
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from .permissions import HasPurchasedAccess
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.shortcuts import get_object_or_404
 
 class LitnerListView(APIView):
-    permission_classes = [IsAuthenticated]
-
+   # permission_classes = [IsAuthenticated]
     def get(self, request, pk=None):
         if pk is None:
             data = LitnerModel.objects.all()
@@ -18,6 +18,93 @@ class LitnerListView(APIView):
             pk_data = LitnerModel.objects.get(pk=pk)
             srz_data = LitnerDetailSerializer(pk_data).data
             return Response(srz_data, status.HTTP_200_OK)
+    
+    def post(self,request,pk):
+
+        exam = get_object_or_404(LitnerModel,pk=pk)
+        try:
+            karname = LitnerKarNameModel.objects.get(user=request.user , exam_id=exam)
+            answers = LitnerKarNameDBModel.objects.filter(karname=karname)
+            
+            is_corrects = []
+            is_false = []
+            is_null = []
+            print(answers)
+            for answer in answers:
+                if not answer.is_correct is None:
+                    if answer.is_correct == True:
+                        is_corrects.append(
+                            {
+                            'question_id': answer.question.id,
+                            # 'question_text': answer.question.question_text,
+                            # 'answer_text': answer.answerss
+                            })
+                    else:
+                        if answer.is_correct == False:
+                          is_false.append({
+                            'question_id': answer.question.id,
+                            # 'question_text': answer.question.question_text,
+                            # 'answer_text': answer.answerss
+                        })           
+                else:
+                    is_null.append({
+                        'question_id': answer.question.id,
+                        # 'question_text': answer.question.question_text,
+                        # 'answer_text': answer.answerss
+                    })
+            result = {
+                'True answers': is_corrects,
+                'False answers': is_false,
+                'None answers': is_null
+            }
+            return Response(result)
+
+        except:
+            # just questions that have answer
+            # [
+            #     {
+            #         "question": 1,
+            #         "is_correct": true or false
+            #     }
+            # ]
+            data = {'user':request.user.id, "exam_id": pk}
+            if request.data:
+                data['karname'] = request.data
+            else:
+                data['karname'] = []
+            serializer = LitnerTakeExamSerializer(data= data, context={'request':request, 'exam':pk})
+            if (serializer.is_valid()):
+                serializer.save()
+                return Response(serializer.data, 200)
+            else:
+                return Response(serializer.errors, status=404)
+            
+        
+    def put(self, request, pk):
+        # request.data example: you should send new questions and their choices 
+        # [
+        #     {
+        #         "question":1,    #our questuin
+        #         "choice":2      #client's answer
+        #     },
+        #     ...
+        # ]
+        data = {'user':request.user.id, "exam_id": pk}
+        if request.data:
+            data['karname'] = request.data
+        else:
+            data['karname'] = []
+        exam = get_object_or_404(LitnerModel, pk=pk)
+        karname = get_object_or_404(LitnerKarNameModel, user= request.user, exam_id= exam)
+        serializer = LitnerTakeExamSerializer(instance=karname, data=data, context={'request':request, 'exam':pk}, partial=True)
+        if serializer.is_valid():
+            try:
+                serializer.save()
+            except Exception:
+                return Response(serializer.errors, status=404)
+        else:
+            return Response(serializer.errors, status = 404)     
+        return Response(serializer.data)            
 
 
 class LitnerView(APIView):
@@ -41,28 +128,6 @@ class LitnerView(APIView):
     def put(self, request):
         pass
 
-
-class LitnerKarNameView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        # Add LitnerKarName Database
-        data = LitnerKarNameSerializer(data=request.data)
-        data.is_valid(raise_exception=True)
-        data.save()
-        return Response(data.data)
-
-    def get(self, request):
-        # GET LitnerKarName Database From ID Litner
-        query = LitnerKarNameModel.objects.all()
-        total_count = query.count()
-        print(total_count)
-        srz_data = LitnerKarNameSerializer(query, many=True).data
-        return Response(srz_data)
-
-    def put(self, request, pk):
-        # Update LitnerKarName Database From ID Litner
-        pass
 
 
 a = {
