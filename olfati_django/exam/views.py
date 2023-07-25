@@ -1,14 +1,15 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import ExamModel, KarNameModel, QuestionModel, ChoiceModel, KarNameDBModel
-from .serializer import ExamDetailsSerializer, ExamSerializer, KarNameSerializer, ChoiceSerializer, KarNameDBMSerializer, TakeExamSerializer
-from django.shortcuts import get_object_or_404
+
+from .models import ExamModel, KarNameModel, KarNameDBModel
+from .serializer import ExamDetailsSerializer, ExamSerializer, KarNameSerializer, TakeExamSerializer
 
 
 class ExamListView(APIView):
-  #  permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     e404 = status.HTTP_400_BAD_REQUEST
 
     def get(self, request, pk=None):
@@ -16,16 +17,16 @@ class ExamListView(APIView):
             try:
                 exams = ExamModel.objects.all()
                 serializer = ExamSerializer(exams, many=True)
-                return Response({'status': status.HTTP_200_OK, 'data': serializer.data})
+                return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'status': self.e404, 'message': str(ins)}, status=self.e404)
+                return Response({'message': str(ins)}, self.e404)
         else:
             try:
                 exams = ExamModel.objects.get(pk=pk)
                 serializer = ExamDetailsSerializer(exams)
-                return Response(serializer.data)
+                return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'status': self.e404, 'message': 'آزمون یافت نشد!'}, status=self.e404)
+                return Response({'message': 'exam notFound'}, self.e404)
 
     def post(self, request, pk):
         exam = get_object_or_404(ExamModel, pk=pk)
@@ -103,7 +104,7 @@ class ExamListView(APIView):
         karname = get_object_or_404(
             KarNameModel, user=request.user, exam_id=exam)
         serializer = TakeExamSerializer(instance=karname, data=data, context={
-                                        'request': request, 'exam': pk}, partial=True)
+            'request': request, 'exam': pk}, partial=True)
         if serializer.is_valid():
             try:
                 serializer.save()
@@ -115,7 +116,7 @@ class ExamListView(APIView):
 
 
 class ExamView(APIView):
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
     e404 = status.HTTP_400_BAD_REQUEST
 
     def post(self, request):
@@ -124,10 +125,10 @@ class ExamView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(
-                    {'message': 'آزمون با موفقیت ساخته شد', 'data': serializer.data}, status.HTTP_201_CREATED)
+                    {'data': serializer.data}, status.HTTP_201_CREATED)
             return Response({'data': serializer.errors}, self.e404)
         except Exception as e:
-            return Response({'data': 'اطلاعات وارد شده کامل نیست!'}, self.e404)
+            return Response({'data': 'data Is no valid'}, self.e404)
 
     def put(self, request, pk):
         query = ExamModel.objects.get(pk=pk)
@@ -136,19 +137,21 @@ class ExamView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(
-                {'message': 'آزمون با موفقیت بروزرسانی شد', 'data': serializer.data}, status.HTTP_200_OK)
+                {'data': serializer.data}, status.HTTP_200_OK)
         return Response({'message': serializer.errors}, self.e404)
 
     def delete(self, request, pk):
         try:
             query = ExamModel.objects.get(pk=pk)
             query.delete()
-            return Response({'message': 'آزمون با موفقیت حذف شد'}, status.HTTP_200_OK)
+            return Response({'message': 'exam remove successfully'}, status.HTTP_200_OK)
         except Exception as e:
-            return Response({'message': 'آزمون یافت نشد'}, status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'exam nof found for remove'}, status.HTTP_404_NOT_FOUND)
 
 
 class ExamKarNameView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         query = KarNameModel.objects.all()
         srz_data = KarNameSerializer(query, many=True).data

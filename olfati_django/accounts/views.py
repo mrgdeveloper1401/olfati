@@ -1,8 +1,6 @@
 from sqlite3 import IntegrityError
 import codecs
-from datetime import timedelta, datetime
 from random import randint
-from django.utils import timezone
 from kavenegar import KavenegarAPI
 from rest_framework import status
 from rest_framework.response import Response
@@ -19,7 +17,7 @@ class UserView(APIView):
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
             if UserModel.objects.filter(phone_number=phone_number).exists():
-                return Response({'error': 'شماره تلفن تکراری است.'},  status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Repetitious Number'}, status.HTTP_400_BAD_REQUEST)
             else:
                 try:
                     user_instance = serializer.save(is_active=True)
@@ -27,14 +25,14 @@ class UserView(APIView):
                     token = {'refresh': str(refresh), 'access': str(
                         refresh.access_token)}
                     response_data = {
-                        'message': 'پروفایل با موفقیت تکمیل شد.',
+                        'message': 'Compiled Profile Successfully',
                         'user': serializer.data,
                         'token': token
                     }
                     return Response(response_data, status.HTTP_201_CREATED)
                 except IntegrityError:
-                    return Response({'error': 'خطای دیگری رخ داد.'},  status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors,  status.HTTP_400_BAD_REQUEST)
+                    return Response({'error': 'Unknown Error'}, status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         userData = UserModel.objects.all()
@@ -47,33 +45,17 @@ class Helper:
     def generate_otp_code():
         return str(randint(1000, 9999))
 
-
-class SendCode(APIView):
-    wait_time = timedelta(minutes=1)  # مدت زمان انتظار بین درخواست‌ها
-
     def post(self, request):
         phone_number = request.data.get("phone_number")
         if not phone_number:
             return Response({'status': status.HTTP_400_BAD_REQUEST, 'message': 'Invalid phone number.'})
         try:
-            current_time = timezone.now()
             code = Helper.generate_otp_code()
-            # بررسی محدودیت ارسال برای هر شماره تلفن منحصر به فرد
-            last_request_time = request.session.get(
-                f'last_request_time_{phone_number}')
-            if last_request_time:
-                last_request_time = datetime.fromisoformat(last_request_time)
-                time_difference = current_time - last_request_time
-                if time_difference < self.wait_time:
-                    remaining_time = self.wait_time - time_difference
-                    return Response({'message': f'Please wait {remaining_time.seconds} seconds'}, status.HTTP_429_TOO_MANY_REQUESTS)
             api_key = '68664A5153554961366569533949395878794951444D2F77732F7378523737783070482B4D434F516549513D'
             params = {'sender': '10008663', 'receptor': phone_number,
                       'message': f'کدتایید شما: \n {code}'}
             api = KavenegarAPI(api_key)
             api.sms_send(params)
-            request.session[f'last_request_time_{phone_number}'] = str(
-                current_time)  # ذخیره زمان ارسال آخرین درخواست
             OtpModel.objects.create(phone_number=phone_number, otpCode=code)
             return Response({'message': f'Code Sent! {code}'}, status.HTTP_200_OK)
         except Exception as e:
@@ -96,9 +78,6 @@ class VerifyOTPView(APIView):
                     user = UserModel.objects.get(
                         phone_number=phone_number, is_active=True)
                     userSRZ = UserSerializers(instance=user).data
-                    # print(user)
-                    # print("+++++++++++++")
-                    # print(userSRZ)
                     refresh = RefreshToken.for_user(user)
                     token = {'refresh': str(refresh), 'access': str(
                         refresh.access_token)}
@@ -107,5 +86,5 @@ class VerifyOTPView(APIView):
                 except UserModel.DoesNotExist:
                     return Response({'is_active': False}, status.HTTP_200_OK)
             except OtpModel.DoesNotExist:
-                return Response({'message': 'کد درست نیست! :('}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'message': 'OTP code not valid'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({'message': serializer.errors}, status.HTTP_500_INTERNAL_SERVER_ERROR)

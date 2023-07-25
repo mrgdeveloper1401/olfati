@@ -2,12 +2,10 @@ from django.db import models
 from accounts.models import UserModel
 
 
-
-
 class MarketHubModel(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=100)
-    cover_image = models.ImageField(upload_to='litner_image_cover/', null=True)
+    cover_image = models.ImageField(upload_to='media/litner_image_cover/', null=True)
     author = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     price = models.SmallIntegerField()
     data_created = models.DateTimeField(auto_now_add=True)
@@ -18,12 +16,10 @@ class MarketHubModel(models.Model):
 
 
 class Payment(models.Model):
-    user = models.ForeignKey(UserModel,on_delete=models.CASCADE)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE)
     has_access = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
-    MarketHub = models.ForeignKey(MarketHubModel,on_delete=models.CASCADE)
-
-    
+    MarketHub = models.ForeignKey(MarketHubModel, on_delete=models.CASCADE)
 
 
 class MarketHubQuestionModel(models.Model):
@@ -32,37 +28,18 @@ class MarketHubQuestionModel(models.Model):
     answers_text = models.CharField(max_length=100)
 
 
-
-
-
 class MarketHubKarNameModel(models.Model):
     exam_id = models.OneToOneField(MarketHubModel, on_delete=models.CASCADE, related_name='exam_id')
-    user = models.ForeignKey(UserModel, on_delete=models.CASCADE,)
-
-
-
-
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, )
 
 
 class MarketHubAnswer(models.Model):
- #   ANSWER_TYPE = (
-     #   ("N", "No Answer"),
-     #   ("F", "False Answer"),
-   #    ("T", "True Answer"),
-   # )
-
     karname = models.ForeignKey(MarketHubKarNameModel, on_delete=models.PROTECT, related_name="litner_azmon")
     question = models.ForeignKey(MarketHubQuestionModel, on_delete=models.PROTECT, )
     is_correct = models.BooleanField(default=False)
-   # type = models.CharField(max_length=1, choices=ANSWER_TYPE)
-
-
-
 
 
 class MarketHubKarNameDBModel(models.Model):
-    question = models.ForeignKey(MarketHubQuestionModel,on_delete=models.PROTECT,related_name='question_id')
+    question = models.ForeignKey(MarketHubQuestionModel, on_delete=models.PROTECT, related_name='question_id')
     is_correct = models.BooleanField(null=True)
-    karname = models.ForeignKey(MarketHubKarNameModel,on_delete=models.PROTECT,related_name="karname")
-
-
+    karname = models.ForeignKey(MarketHubKarNameModel, on_delete=models.PROTECT, related_name="karname")
