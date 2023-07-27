@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from rest_framework import filters
 from .models import *
 from .permissions import HasPurchasedAccess, IsAuthenticated
 from .serializer import MarketHubSerializer, MarketHubPaidSerializer, MarketHubTakeExamSerializer, \
@@ -100,6 +100,12 @@ class MarketHubListView(APIView):
             else:
                 return Response(srz.errors, status=404)
             return Response(srz.data)
+
+class MarketHubSearchView(generics.ListCreateAPIView):
+    search_fields = ['title',]
+    filter_backends = (filters.SearchFilter,)
+    queryset = MarketHubModel.objects.all()
+    serializer_class = MarketHubSerializer
 
 
 #  برای دیلیت و دیدن دیتیل و اپدیت مارکت هاب
