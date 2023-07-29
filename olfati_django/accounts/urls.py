@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import SendCode, VerifyOTPView, UserView
+from accounts.views import SendCode, VerifyOTPView, UserView
 
 urlpatterns = [
     path("login", SendCode.as_view()),

@@ -22,7 +22,8 @@ class LitnerListView(APIView):
         else:
             try:
                 leitners = LitnerModel.objects.get(pk=pk)
-                serializer = LitnerSerializer(leitners)
+                serializer = LitnerDetailSerializer(leitners)
+                serializer = LitnerDetailSerializer(leitners)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
                 return Response({'message': 'Leitner notFound'}, self.e404)

@@ -1,11 +1,13 @@
-from sqlite3 import IntegrityError
 import codecs
 from random import randint
+from sqlite3 import IntegrityError
+
 from kavenegar import KavenegarAPI
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from .models import OtpModel, UserModel
 from .serializer import OtpSerializers, UserSerializers
 
@@ -45,6 +47,8 @@ class Helper:
     def generate_otp_code():
         return str(randint(1000, 9999))
 
+
+class SendCode(APIView):
     def post(self, request):
         phone_number = request.data.get("phone_number")
         if not phone_number:
