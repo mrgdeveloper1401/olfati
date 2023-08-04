@@ -3,35 +3,6 @@ from rest_framework import serializers
 from accounts.serializer import UserSerializers
 
 
-# اگه پرداخت نکرده بود
-class MarketHubSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MarketHubModel
-        fields = ('title', 'description', 'cover_image', 'author', 'price', 'data_created')
-
-
-class MarketHubQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MarketHubQuestionModel
-        fields = "__all__"
-
-
-# اگه پرداخت کرده بود
-
-
-class MarketHubPaidSerializer(serializers.ModelSerializer):
-    question = MarketHubQuestionSerializer(many=True, read_only=True)
-    cover_image = serializers.ImageField(source="markethub.cover_image")
-    title = serializers.CharField(source="markethub.title")
-    description = serializers.CharField(source="markethub.description")
-
-    class Meta:
-        model = MarketHubQuestionModel
-        fields = '__all__'
-
-
-# ************************************************
-
 
 class MarketHubAwnsereserilizer(serializers.ModelSerializer):
     class Meta:
@@ -78,6 +49,7 @@ class MarketHubKarnameDBSerializer(serializers.ModelSerializer):
 class MarketHubKarNameSerializer(serializers.ModelSerializer):
     user = UserSerializers()
     exam_id = MarketHubDetailSerializer()
+    is_open = serializers.ReadOnlyField()
 
     class Meta:
         model = MarketHubKarNameModel
@@ -120,5 +92,42 @@ class MarketHubTakeExamSerializer(serializers.ModelSerializer):
             answered.is_correct = is_correct
             answered.save()
         return karname
+    
 
-    #
+
+
+
+
+
+
+
+# اگه پرداخت نکرده بود
+class MarketHubSerializer(serializers.ModelSerializer):
+    is_open = MarketHubKarNameSerializer(many=True)
+    class Meta:
+        model = MarketHubModel
+        fields = ('title', 'description', 'cover_image', 'full_name','author', 'price', 'data_created','is_open')
+
+
+class MarketHubQuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MarketHubQuestionModel
+        fields = "__all__"
+
+
+# اگه پرداخت کرده بود
+
+
+class MarketHubPaidSerializer(serializers.ModelSerializer):
+    question = MarketHubQuestionSerializer(many=True, read_only=True)
+    cover_image = serializers.ImageField(source="markethub.cover_image")
+    title = serializers.CharField(source="markethub.title")
+    description = serializers.CharField(source="markethub.description")
+    is_open = MarketHubKarNameSerializer(many=True)
+
+    class Meta:
+        model = MarketHubQuestionModel
+        fields = '__all__'
+
+
+
