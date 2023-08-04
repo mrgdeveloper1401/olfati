@@ -58,15 +58,15 @@ class MarketHubDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MarketHubModel
-        fields = ("id", "title", "study_field", "author", "cover_image", "data_created", "litner",)
+        fields = ("id", "title", "author", "cover_image", "data_created", "markethub",)
 
     def create(self, validated_data):
-        questions_data = validated_data.pop('litner', [])
-        litner = MarketHubModel.objects.create(**validated_data)
+        questions_data = validated_data.pop('markethub', [])
+        markethub = MarketHubModel.objects.create(**validated_data)
         for question in questions_data:
             print(question)
-            MarketHubQuestionModel.objects.create(litner=litner, **question)
-        return litner
+            MarketHubQuestionModel.objects.create(markethub=markethub, **question)
+        return markethub
 
 
 class MarketHubKarnameDBSerializer(serializers.ModelSerializer):
@@ -75,7 +75,7 @@ class MarketHubKarnameDBSerializer(serializers.ModelSerializer):
         fields = ('question', 'is_correct')
 
 
-class LitnerKarNameSerializer(serializers.ModelSerializer):
+class MarketHubKarNameSerializer(serializers.ModelSerializer):
     user = UserSerializers()
     exam_id = MarketHubDetailSerializer()
 
@@ -93,10 +93,10 @@ class MarketHubTakeExamSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context.get('request').user
-        exam = MarketHubKarNameModel.objects.get(pk=self.context.get('exam'))
+        exam = MarketHubModel.objects.get(pk=self.context.get('exam'),)
         questions = []
 
-        karname = MarketHubKarNameModel.objects.create(user=user, exam_id=exam)
+        karname = MarketHubKarNameModel.objects.create(user=user, exam_id=exam,)
         for question_and_choice in validated_data['karname']:
             question = question_and_choice['question']
             if question.markethub != karname.exam_id:
