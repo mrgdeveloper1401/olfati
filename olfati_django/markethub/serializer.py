@@ -49,7 +49,6 @@ class MarketHubKarnameDBSerializer(serializers.ModelSerializer):
 class MarketHubKarNameSerializer(serializers.ModelSerializer):
     user = UserSerializers()
     exam_id = MarketHubDetailSerializer()
-    is_open = serializers.ReadOnlyField()
 
     class Meta:
         model = MarketHubKarNameModel
@@ -103,10 +102,10 @@ class MarketHubTakeExamSerializer(serializers.ModelSerializer):
 
 # اگه پرداخت نکرده بود
 class MarketHubSerializer(serializers.ModelSerializer):
-    is_open = MarketHubKarNameSerializer(many=True)
+   
     class Meta:
         model = MarketHubModel
-        fields = ('title', 'description', 'cover_image', 'full_name','author', 'price', 'data_created','is_open')
+        fields = ('title', 'description', 'cover_image','author', 'price', 'data_created',)
 
 
 class MarketHubQuestionSerializer(serializers.ModelSerializer):
