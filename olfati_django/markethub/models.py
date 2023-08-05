@@ -32,7 +32,8 @@ class MarketHubQuestionModel(models.Model):
 class MarketHubKarNameModel(models.Model):
     exam_id = models.OneToOneField(MarketHubModel, on_delete=models.CASCADE, related_name='exam_id')
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, )
-
+    is_open = models.BooleanField(default=True)
+    
 
 class MarketHubAnswer(models.Model):
     karname = models.ForeignKey(MarketHubKarNameModel, on_delete=models.PROTECT, related_name="litner_azmon")

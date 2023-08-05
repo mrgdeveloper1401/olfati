@@ -21,6 +21,7 @@ class MarketHubListView(APIView):
                 exams = MarketHubModel.objects.all()
                 serializer = MarketHubSerializer(exams, many=True)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
+                 
             except Exception as ins:
                 return Response({'message': str(ins)}, self.e404)
         else:
@@ -77,7 +78,7 @@ class MarketHubListView(APIView):
                 data['karname'] = request.data
             else:
                 data['karname'] = []
-            srz = MarketHubTakeExamSerializer(data=data, context={'request': request, exam: pk})
+            srz = MarketHubTakeExamSerializer(data=data, context={'request': request, "exam": pk})
             if srz.is_valid():
                 srz.save()
                 return Response(srz.data, 200)
