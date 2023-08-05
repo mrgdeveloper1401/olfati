@@ -8,6 +8,7 @@ class ExamModel(models.Model):
     cover_image = models.ImageField(upload_to='media/exam_image_cover/')
     author = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     data_created = models.DateTimeField(auto_now_add=True)
+    is_open = models.BooleanField(auto_created=False,null=True,default=False)
 
     def __str__(self):
         return self.title[:20]

@@ -8,6 +8,8 @@ class LitnerModel(models.Model):
     cover_image = models.ImageField(upload_to='media/litner_image_cover/', null=True)
     author = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     data_created = models.DateTimeField(auto_now_add=True)
+    is_open = models.BooleanField(null=True,default=False)
+
 
 
 class LitnerQuestionModel(models.Model):

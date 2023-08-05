@@ -7,7 +7,7 @@ from accounts.serializer import UserSerializers
 class MarketHubSerializer(serializers.ModelSerializer):
     class Meta:
         model = MarketHubModel
-        fields = ('title', 'description', 'cover_image', 'author', 'price', 'data_created')
+        fields = ('title', 'description', 'cover_image', 'author', 'price', 'data_created','is_open')
 
 
 class MarketHubQuestionSerializer(serializers.ModelSerializer):
@@ -58,7 +58,7 @@ class MarketHubDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MarketHubModel
-        fields = ("id", "title", "study_field", "author", "cover_image", "data_created", "litner",)
+        fields = ("id", "title", "study_field", "author", "cover_image", "data_created", "litner",'is_open')
 
     def create(self, validated_data):
         questions_data = validated_data.pop('litner', [])

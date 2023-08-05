@@ -31,6 +31,7 @@ class ExamListView(APIView):
     def post(self, request, pk):
         exam = get_object_or_404(ExamModel, pk=pk)
         try:
+            exam.is_open=True
             karname = KarNameModel.objects.get(user=request.user, exam_id=exam)
             answers = KarNameDBModel.objects.filter(karname=karname)
             is_corrects = []
@@ -61,6 +62,7 @@ class ExamListView(APIView):
                 'False answers': is_false,
                 'None answers': is_null
             }
+            exam.save()
             return Response(result)
 
         except:

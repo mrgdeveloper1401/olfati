@@ -3,7 +3,7 @@ from markethub.views import MarketHubListView, MarketHubView, QuestionView,Marke
 
 urlpatterns = [
 #class Markethub
-    path("", MarketHubListView.as_view()),
+    path("list", MarketHubListView.as_view()),
     path("<int:pk>", MarketHubListView.as_view()),
     path("list/<int:pk>", MarketHubListView.as_view()),
     path('MarketHubQuestionPaid/<int:pk>',MarketHubListView.as_view()),

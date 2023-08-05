@@ -29,7 +29,7 @@ class ExamDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExamModel
-        fields = ('author', 'id', 'title', 'study_field', 'questions', 'data_created')
+        fields = ('author', 'id', 'title', 'study_field', 'questions', 'data_created','is_open')
 
     def create(self, validated_data):
         questions_data = validated_data.pop('questions', [])

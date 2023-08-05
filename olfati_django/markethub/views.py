@@ -34,6 +34,7 @@ class MarketHubListView(APIView):
     def post(self, request, pk):
         exam = get_object_or_404(MarketHubModel, pk=pk)
         try:
+            exam.is_open = True
             karname = MarketHubKarNameModel.objects.get(request.user, exam_id=exam)
             answers = MarketHubKarNameDBModel.objects.filter(karname=karname)
             is_corrects = []
@@ -66,6 +67,7 @@ class MarketHubListView(APIView):
                 'True answers': is_corrects,
                 'False answers': is_false,
                 'None answers': is_null}
+            exam.save()
             return Response(result)
 
 

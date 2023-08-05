@@ -32,9 +32,9 @@ class LitnerListView(APIView):
 
         exam = get_object_or_404(LitnerModel, pk=pk)
         try:
+            exam.is_open = True
             karname = LitnerKarNameModel.objects.get(user=request.user, exam_id=exam)
             answers = LitnerKarNameDBModel.objects.filter(karname=karname)
-
             is_corrects = []
             is_false = []
             is_null = []
@@ -66,6 +66,7 @@ class LitnerListView(APIView):
                 'False answers': is_false,
                 'None answers': is_null
             }
+            exam.save()
             return Response(result)
 
         except:
