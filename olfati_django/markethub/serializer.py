@@ -58,15 +58,15 @@ class MarketHubDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MarketHubModel
-        fields = ("id", "title", "author", "cover_image", "data_created", "markethub",)
+        fields = ("id", "title", "study_field", "author", "cover_image", "data_created", "litner",'is_open')
 
     def create(self, validated_data):
-        questions_data = validated_data.pop('markethub', [])
-        markethub = MarketHubModel.objects.create(**validated_data)
+        questions_data = validated_data.pop('litner', [])
+        litner = MarketHubModel.objects.create(**validated_data)
         for question in questions_data:
             print(question)
-            MarketHubQuestionModel.objects.create(markethub=markethub, **question)
-        return markethub
+            MarketHubQuestionModel.objects.create(litner=litner, **question)
+        return litner
 
 
 class MarketHubKarnameDBSerializer(serializers.ModelSerializer):
@@ -75,7 +75,7 @@ class MarketHubKarnameDBSerializer(serializers.ModelSerializer):
         fields = ('question', 'is_correct')
 
 
-class MarketHubKarNameSerializer(serializers.ModelSerializer):
+class LitnerKarNameSerializer(serializers.ModelSerializer):
     user = UserSerializers()
     exam_id = MarketHubDetailSerializer()
 
@@ -93,10 +93,10 @@ class MarketHubTakeExamSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context.get('request').user
-        exam = MarketHubModel.objects.get(pk=self.context.get('exam'),)
+        exam = MarketHubKarNameModel.objects.get(pk=self.context.get('exam'))
         questions = []
 
-        karname = MarketHubKarNameModel.objects.create(user=user, exam_id=exam,)
+        karname = MarketHubKarNameModel.objects.create(user=user, exam_id=exam)
         for question_and_choice in validated_data['karname']:
             question = question_and_choice['question']
             if question.markethub != karname.exam_id:
@@ -120,42 +120,5 @@ class MarketHubTakeExamSerializer(serializers.ModelSerializer):
             answered.is_correct = is_correct
             answered.save()
         return karname
-    
 
-
-
-
-
-
-
-
-# اگه پرداخت نکرده بود
-class MarketHubSerializer(serializers.ModelSerializer):
-   
-    class Meta:
-        model = MarketHubModel
-        fields = ('title', 'description', 'cover_image','author', 'price', 'data_created',)
-
-
-class MarketHubQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MarketHubQuestionModel
-        fields = "__all__"
-
-
-# اگه پرداخت کرده بود
-
-
-class MarketHubPaidSerializer(serializers.ModelSerializer):
-    question = MarketHubQuestionSerializer(many=True, read_only=True)
-    cover_image = serializers.ImageField(source="markethub.cover_image")
-    title = serializers.CharField(source="markethub.title")
-    description = serializers.CharField(source="markethub.description")
-    is_open = MarketHubKarNameSerializer(many=True)
-
-    class Meta:
-        model = MarketHubQuestionModel
-        fields = '__all__'
-
-
-
+    #
