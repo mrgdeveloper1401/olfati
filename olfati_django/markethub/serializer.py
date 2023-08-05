@@ -3,7 +3,6 @@ from rest_framework import serializers
 from accounts.serializer import UserSerializers
 
 
-<<<<<<< HEAD
 # اگه پرداخت نکرده بود
 class MarketHubSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,8 +32,6 @@ class MarketHubPaidSerializer(serializers.ModelSerializer):
 
 # ************************************************
 
-=======
->>>>>>> f8638bcc6f3c65b7d994ba28e80b6ccd145e6b2d
 
 class MarketHubAwnsereserilizer(serializers.ModelSerializer):
     class Meta:
@@ -61,11 +58,7 @@ class MarketHubDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MarketHubModel
-<<<<<<< HEAD
-        fields = ("id", "title", "study_field", "author", "cover_image", "data_created", "litner",'is_open')
-=======
         fields = ("id", "title", "author", "cover_image", "data_created", "markethub",)
->>>>>>> f8638bcc6f3c65b7d994ba28e80b6ccd145e6b2d
 
     def create(self, validated_data):
         questions_data = validated_data.pop('markethub', [])
