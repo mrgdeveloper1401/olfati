@@ -19,14 +19,14 @@ class ExamListView(APIView):
                 serializer = ExamSerializer(exams, many=True)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'message': str(ins)}, self.e404)
+                return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND)
         else:
             try:
                 exams = ExamModel.objects.get(pk=pk)
                 serializer = ExamDetailsSerializer(exams)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'message': 'exam notFound'}, self.e404)
+                return Response({'message': 'exam notFound'}, status.HTTP_404_NOT_FOUND)
 
     def post(self, request, pk):
         exam = get_object_or_404(ExamModel, pk=pk)

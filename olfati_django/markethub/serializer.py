@@ -7,7 +7,7 @@ from accounts.serializer import UserSerializers
 class MarketHubSerializer(serializers.ModelSerializer):
     class Meta:
         model = MarketHubModel
-        fields = ('title', 'description', 'cover_image', 'author', 'price', 'data_created','is_open')
+        fields = ('title', 'description','study_field', 'cover_image', 'author', 'price', 'data_created','is_open')
 
 
 class MarketHubQuestionSerializer(serializers.ModelSerializer):

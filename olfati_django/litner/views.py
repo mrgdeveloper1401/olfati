@@ -18,7 +18,7 @@ class LitnerListView(APIView):
                 serializer = LitnerSerializer(leitners, many=True)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'message': str(ins)}, self.e404)
+                return Response({'message': str(ins)},status.HTTP_404_NOT_FOUND)
         else:
             try:
                 leitners = LitnerModel.objects.get(pk=pk)
@@ -26,7 +26,7 @@ class LitnerListView(APIView):
                 serializer = LitnerDetailSerializer(leitners)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'message': 'Leitner notFound'}, self.e404)
+                return Response({'message': 'Leitner notFound'}, status.HTTP_404_NOT_FOUND)
 
     def post(self, request, pk):
 

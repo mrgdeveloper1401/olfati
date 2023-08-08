@@ -10,6 +10,7 @@ class MarketHubModel(models.Model):
     price = models.SmallIntegerField()
     data_created = models.DateTimeField(auto_now_add=True)
     paid_users = models.ManyToManyField(UserModel, related_name='paid_market_hubs', blank=True)
+    study_field = models.CharField(max_length=100,default="")
     is_open = models.BooleanField(null=True,default=False)
 
     def is_paid_user(self, user):

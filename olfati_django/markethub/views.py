@@ -23,14 +23,14 @@ class MarketHubListView(APIView):
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
                  
             except Exception as ins:
-                return Response({'message': str(ins)}, self.e404)
+                return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND)
         else:
             try:
                 exams = MarketHubModel.objects.get(pk=pk)
                 serializer = MarketHubDetailSerializer(exams)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'message': 'markethub notFound'}, self.e404)
+                return Response({'message': 'markethub notFound'}, status.HTTP_404_NOT_FOUND)
 
     def post(self, request, pk):
         exam = get_object_or_404(MarketHubModel, pk=pk)
