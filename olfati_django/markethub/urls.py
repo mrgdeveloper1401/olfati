@@ -1,5 +1,5 @@
 from django.urls import path
-from markethub.views import MarketHubListView, MarketHubView, QuestionView,MarketHubSearchView
+from markethub.views import MarketHubListView, MarketHubView, QuestionView,MarketHubSearchView,UserAddMarkethub
 
 urlpatterns = [
 #class Markethub
@@ -10,8 +10,6 @@ urlpatterns = [
     path('update/<int:pk>', MarketHubView.as_view()),
     path('delete/<int:pk>', MarketHubView.as_view()),
     path('detail/<int:pk>',MarketHubView.as_view()),
-
-
     path('search/',MarketHubSearchView.as_view()),
-    path('question/<int:pk>', QuestionView.as_view()),
+    path('paid_users/<int:pk>', QuestionView.as_view()),
 ]

@@ -47,7 +47,7 @@ class UserModel(auth_models.AbstractUser):
     REQUIRED_FIELDS = ['username', 'melli_code']
 
     def __str__(self):
-        return f'{self.phone_number}, {self.username}'
+        return self.full_name
 
 
 class OtpModel(models.Model):

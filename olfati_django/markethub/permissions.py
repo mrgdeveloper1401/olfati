@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthenticated
-from .models import Payment
+
 
 
 # پرمیشن برای سوپر یوزر
@@ -19,9 +19,3 @@ class IsAuthenticated(BasePermission):
             return True
         return bool(request.user.is_authenticated or request.user.is_superuser)
 
-
-# پرمیشن برای چک کردن پرداخت کاربر
-
-class HasPurchasedAccess(BasePermission):
-    def has_object_permission(self, request, view):
-        return request.user.is_authenticated and request.user.Payment.has_access

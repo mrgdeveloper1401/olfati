@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS,IsAuthenticated
-from .models import Payment
+
 
 
 
@@ -22,15 +22,15 @@ class IsAuthenticated(BasePermission):
 
 
 #پرمیشن برای چک کردن پرداخت کاربر
-class HasPurchasedAccess(BasePermission):
-    def has_permission(self, request,view):
-        if request.method in SAFE_METHODS and request.user.is_authenticated:
-         return True
-        try:
-            payment=Payment.objects.get(user=request.user.id)
-        except Payment.DoesNotExist:
-            return False
-        return getattr(payment,'has_access',True)
+#class HasPurchasedAccess(BasePermission):
+   # def has_permission(self, request,view):
+   #     if request.method in SAFE_METHODS and request.user.is_authenticated:
+     #    return True
+     #   try:
+      #      payment=Payment.objects.get(user=request.user.id)
+       # except Payment.DoesNotExist:
+        #    return False
+        #return getattr(payment,'has_access',True)
 
 
 

@@ -7,7 +7,7 @@ from accounts.serializer import UserSerializers
 class MarketHubSerializer(serializers.ModelSerializer):
     class Meta:
         model = MarketHubModel
-        fields = ('title', 'description','study_field', 'cover_image', 'author', 'price', 'data_created','is_open')
+        fields = ('title', 'description','study_field', 'cover_image', 'price', 'data_created','is_open')
 
 
 class MarketHubQuestionSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class MarketHubPaidSerializer(serializers.ModelSerializer):
     cover_image = serializers.ImageField(source="markethub.cover_image")
     title = serializers.CharField(source="markethub.title")
     description = serializers.CharField(source="markethub.description")
-
+     
     class Meta:
         model = MarketHubQuestionModel
         fields = '__all__'
@@ -53,12 +53,20 @@ class MarketHubSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class MarketHubDetailSerializer(serializers.ModelSerializer):
-    markethub = MarketHubQuestionSerializer(many=True)
-
+class MarketHubSearchSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField()
     class Meta:
         model = MarketHubModel
-        fields = ("id", "title", "study_field", "author", "cover_image", "data_created", "litner",'is_open')
+        fields ="__all__"
+
+
+
+
+class MarketHubDetailSerializer(serializers.ModelSerializer):
+   # markethub = MarketHubQuestionSerializer(many=True)
+    class Meta:
+        model = MarketHubModel
+        fields = ("id", "title", "study_field", "cover_image", "data_created",'is_open','author','description')
 
     def create(self, validated_data):
         questions_data = validated_data.pop('litner', [])
@@ -121,4 +129,12 @@ class MarketHubTakeExamSerializer(serializers.ModelSerializer):
             answered.save()
         return karname
 
-    #
+    
+
+
+#*******************************************************************
+class ClassSerializer(serializers.ModelSerializer):
+    markethub = MarketHubSerializer(many=True)
+    class Meta: 
+        model =Classmodel
+        fields = '__all__'

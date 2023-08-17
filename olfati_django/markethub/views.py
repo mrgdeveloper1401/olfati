@@ -5,10 +5,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import filters
 from .models import *
-from .permissions import HasPurchasedAccess, IsAuthenticated
-from .serializer import MarketHubSerializer, MarketHubPaidSerializer, MarketHubTakeExamSerializer, \
-    MarketHubDetailSerializer
+from .permissions import  IsAuthenticated
+from .serializer import  MarketHubSerializer, MarketHubPaidSerializer, MarketHubTakeExamSerializer,MarketHubSearchSerializer, MarketHubDetailSerializer
 
+#part1 source ___________________________________________________________________________________________________________________
 
 #  برای دیدن لیست مارکت هاب ها و امتحان
 class MarketHubListView(APIView):
@@ -27,11 +27,10 @@ class MarketHubListView(APIView):
         else:
             try:
                 exams = MarketHubModel.objects.get(pk=pk)
-                serializer = MarketHubDetailSerializer(exams)
+                serializer = MarketHubDetailSerializer(instance=exams)
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
-                return Response({'message': 'markethub notFound'}, status.HTTP_404_NOT_FOUND)
-
+                return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND)
     def post(self, request, pk):
         exam = get_object_or_404(MarketHubModel, pk=pk)
         try:
@@ -104,27 +103,28 @@ class MarketHubListView(APIView):
                 return Response(srz.errors, status=404)
             return Response(srz.data)
 
+
+
+
+
 class MarketHubSearchView(generics.ListCreateAPIView):
-    search_fields = ['title',]
-    filter_backends = (filters.SearchFilter,)
+    search_fields = ['title']
+    search = list(map(lambda field: f"data:{field}", search_fields))
+    filter_backends = [filters.SearchFilter]
     queryset = MarketHubModel.objects.all()
     serializer_class = MarketHubSerializer
-
+    
 
 #  برای دیلیت و دیدن دیتیل و اپدیت مارکت هاب
 class MarketHubView(generics.RetrieveAPIView, generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated, HasPurchasedAccess]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None):
-        payment = Payment.objects.get(MarketHub=pk)
-        if request.user.is_authenticated and payment.has_access == True:
-            data = MarketHubQuestionModel.objects.filter(pk=pk)
-            srz_data = MarketHubPaidSerializer(instance=data, many=True)
-            return Response(srz_data.data)
-        else:
-            data = MarketHubModel.objects.get(pk=pk)
-            srz_data = MarketHubSerializer(data)
-            return Response(srz_data.data)
+        # search | GetDetail | Get all
+        data = MarketHubModel.objects.all()
+        srz_data = MarketHubSerializer(data, many=True)
+        return Response(srz_data.data)
+
 
     def put(self, request, pk=None):
         data = MarketHubModel.objects.get(pk=pk)
@@ -138,19 +138,26 @@ class MarketHubView(generics.RetrieveAPIView, generics.RetrieveUpdateAPIView, ge
         data = MarketHubModel.objects.get(pk=pk)
         data.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 #  نشان دادن کوسشن به یوزر  در صورت پرداخت در غیر این صورت نشان دادن مارکت هاب
-class QuestionView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated, HasPurchasedAccess]
 
+class QuestionView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk):
-        payment = Payment.objects.get(MarketHub=pk)
-        if request.user.is_authenticated and payment.has_access == True:
-            data = MarketHubQuestionModel.objects.filter(pk=pk)
-            srz_data = MarketHubPaidSerializer(instance=data, many=True)
-            return Response(srz_data.data)
+        markethub = get_object_or_404(MarketHubModel,pk=pk,author=request.user.id)
+        try:
+            markethub.has_access = True
+            if markethub.has_access==True:
+                
+                markethub2 = MarketHubQuestionModel.objects.get(markethub=markethub)
+                srz = MarketHubPaidSerializer(instance=markethub2)
+                markethub.save()
+                return Response(srz.data, status=status.HTTP_200_OK)
+            else:
+                markethub = get_object_or_404(MarketHubModel,pk=pk)
+                srz = MarketHubDetailSerializer(instance=markethub)
+                return Response(srz.data, status=status.HTTP_200_OK)
+                                
+        except:
+             return Response(status=status.HTTP_402_PAYMENT_REQUIRED)
 
-        data = get_object_or_404(MarketHubModel, pk=pk)
-        srz_data = MarketHubSerializer(instance=data)
-        return Response(srz_data.data)
+
