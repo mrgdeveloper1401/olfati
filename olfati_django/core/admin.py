@@ -2,9 +2,9 @@ from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 
 from accounts.models import OtpModel, UserModel
-from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel
-from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel
-from markethub.models import MarketHubModel, MarketHubQuestionModel,MarketHubKarNameModel
+from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
+from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel
+from markethub.models import MarketHubModel, MarketHubQuestionModel,MarketHubKarNameModel, MarketHubKarNameDBModel, Myclass
 
 
 
@@ -116,3 +116,27 @@ class LogEntryAdmin(admin.ModelAdmin):
 class karnameAdmin(admin.ModelAdmin):
     pass
 # class UserAdmin(admin.ModelAdmin):
+
+
+
+@admin.register(MarketHubKarNameDBModel)
+class MarketHubKarNameDBModelAdmin(admin.ModelAdmin):
+    pass
+# class UserAdmin(admin.ModelAdmin):
+@admin.register(MyLitnerclass)
+class MyLitnerclassAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(MyExamClass)
+class MyExamClassAdmin(admin.ModelAdmin):
+    pass
+
+
+
+@admin.register(Myclass)
+class MyclassAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(LitnerKarNameDBModel)
+class LitnerKarNameDBModelAdmin(admin.ModelAdmin):
+    pass

@@ -1,17 +1,25 @@
 from django.db import models
 from accounts.models import UserModel
 
+class MyExamClass(models.Model):
+    title = models.CharField(max_length=100)
+    study_field = models.CharField(max_length=100)
+    cover_image = models.ImageField(upload_to='media/classes_image_cover/', null=True)
+    author= models.ForeignKey(UserModel, on_delete=models.PROTECT)
+
+
 
 class ExamModel(models.Model):
     title = models.CharField(max_length=100)
-    study_field = models.CharField(max_length=100)
     cover_image = models.ImageField(upload_to='media/exam_image_cover/')
-    author = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     data_created = models.DateTimeField(auto_now_add=True)
-    is_open = models.BooleanField(auto_created=False,null=True,default=False)
+    myclass = models.ForeignKey(MyExamClass, related_name='exams', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title[:20]
+
+    def have_karname(self, user):
+        return KarNameModel.objects.filter(user=user).exists()
 
 
 class QuestionModel(models.Model):

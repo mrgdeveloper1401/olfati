@@ -1,14 +1,20 @@
 from django.db import models
 from accounts.models import UserModel
 
+class MyLitnerclass(models.Model):
+    title = models.CharField(max_length=100)
+    study_field = models.CharField(max_length=100)
+    cover_image = models.ImageField(upload_to='media/classes_image_cover/', null=True)
+    author= models.ForeignKey(UserModel, on_delete=models.PROTECT)
 
 class LitnerModel(models.Model):
     title = models.CharField(max_length=100)
-    study_field = models.CharField(max_length=100)
     cover_image = models.ImageField(upload_to='media/litner_image_cover/', null=True)
-    author = models.ForeignKey(UserModel, on_delete=models.PROTECT)
     data_created = models.DateTimeField(auto_now_add=True)
-    is_open = models.BooleanField(null=True,default=False)
+    myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE)
+
+    def have_karname(self, user):
+        return LitnerKarNameModel.objects.filter(user=user).exists()
 
 
 

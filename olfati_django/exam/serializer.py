@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import ExamModel, ChoiceModel, QuestionModel, KarNameModel, KarNameDBModel
+from .models import ExamModel, ChoiceModel, QuestionModel, KarNameModel, KarNameDBModel, MyExamClass
 from accounts.serializer import UserSerializers
 from django.shortcuts import get_object_or_404
 
@@ -26,11 +26,15 @@ class ExamQuestionSerializer(serializers.ModelSerializer):
 
 class ExamDetailsSerializer(serializers.ModelSerializer):
     questions = ExamQuestionSerializer(many=True)
-
+    have_karname = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = ExamModel
-        fields = ('author', 'id', 'title', 'study_field', 'questions', 'data_created','is_open')
-
+        fields = ('id', 'title', 'questions', 'data_created', 'have_karname')
+   
+    def get_have_karname(self, obj):
+        request = self.context.get("request")
+        return obj.have_karname(request.user)
+    
     def create(self, validated_data):
         questions_data = validated_data.pop('questions', [])
         exam = ExamModel.objects.create(**validated_data)
@@ -53,11 +57,29 @@ class ExamDetailsSerializer(serializers.ModelSerializer):
 
 
 class ExamSerializer(serializers.ModelSerializer):
+    have_karname = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = ExamModel
         fields = "__all__"
 
+    def get_have_karname(self, obj):
+        request = self.context.get("request")
+        return obj.have_karname(request.user)
+    
 
+class MyExamClassSerializer(serializers.ModelSerializer):
+    exams = ExamSerializer(many=True, read_only=True)
+    class Meta: 
+        model = MyExamClass
+        fields = '__all__'
+        read_only_fields = ['author']
+
+    def to_representation(self, instance):
+        request = self.context.get("request")
+        rep = super().to_representation(instance)
+        if not request.parser_context.get("kwargs").get("pk"):
+            rep.pop("exams", None)
+        return rep
 
 class KarNameDBMSerializer(serializers.ModelSerializer):
     # choice = ChoiceSerializer(many=True)

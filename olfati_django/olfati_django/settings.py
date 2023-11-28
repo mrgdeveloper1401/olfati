@@ -17,9 +17,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
+        # 'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -161,3 +161,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(weeks=24),  # مدت اعتبار توکن دسترسی
     'REFRESH_TOKEN_LIFETIME': timedelta(weeks=48),  # مدت اعتبار توکن بازیابی
 }
+
+REDIRECTURL = "https://olfati.iran.liara.run"
+CALLBACKURL = 'http://{REDIRECTURL}/markethub/zarrin-pall/verify/'
+MERCHANT = "7bd2714c-3674-4566-a4ff-8ec4ed9fac64"

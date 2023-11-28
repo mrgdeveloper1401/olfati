@@ -47,8 +47,11 @@ class UserModel(auth_models.AbstractUser):
     REQUIRED_FIELDS = ['username', 'melli_code']
 
     def __str__(self):
-        return self.full_name
-
+        if self.full_name:
+            return self.full_name
+        elif self.username:
+            return self.username
+        return self.pk
 
 class OtpModel(models.Model):
     phone_number = models.CharField(max_length=12)

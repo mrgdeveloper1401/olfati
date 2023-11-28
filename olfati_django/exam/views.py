@@ -3,9 +3,37 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from .models import ExamModel, KarNameModel, KarNameDBModel, MyExamClass
+from .serializer import ExamDetailsSerializer, ExamSerializer, KarNameSerializer, TakeExamSerializer, MyExamClassSerializer
 
-from .models import ExamModel, KarNameModel, KarNameDBModel
-from .serializer import ExamDetailsSerializer, ExamSerializer, KarNameSerializer, TakeExamSerializer
+class ListCreateMyClassView(ModelViewSet):
+    permission_classes = [IsAuthenticated,]
+    serializer_class = MyExamClassSerializer
+    queryset = MyExamClass.objects.all()
+
+    def get_serializer_class(self):
+        return MyExamClassSerializer
+            
+    def get_serializer_context(self):
+        return {'request': self.request}
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"data":serializer.data})
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data.get('exams', None)
+        return Response({"data":data})
+
 
 
 class ExamListView(APIView):
@@ -16,22 +44,22 @@ class ExamListView(APIView):
         if pk is None:
             try:
                 exams = ExamModel.objects.all()
-                serializer = ExamSerializer(exams, many=True)
+                serializer = ExamSerializer(exams, many=True, context = {'request': request})
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
                 return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND)
         else:
             try:
                 exams = ExamModel.objects.get(pk=pk)
-                serializer = ExamDetailsSerializer(exams)
-                return Response({'data': serializer.data}, status.HTTP_200_OK)
+                serializer = ExamDetailsSerializer(exams, context = {'request': request})  
+                data = serializer.data.get("questions")   
+                return Response({'data': data}, status.HTTP_200_OK)
             except Exception as ins:
                 return Response({'message': 'exam notFound'}, status.HTTP_404_NOT_FOUND)
 
     def post(self, request, pk):
         exam = get_object_or_404(ExamModel, pk=pk)
         try:
-            exam.is_open=True
             karname = KarNameModel.objects.get(user=request.user, exam_id=exam)
             answers = KarNameDBModel.objects.filter(karname=karname)
             is_corrects = []
@@ -123,7 +151,7 @@ class ExamView(APIView):
 
     def post(self, request):
         try:
-            serializer = ExamDetailsSerializer(data=request.data)
+            serializer = ExamDetailsSerializer(data=request.data, context = {'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(
@@ -135,7 +163,7 @@ class ExamView(APIView):
     def put(self, request, pk):
         query = ExamModel.objects.get(pk=pk)
         serializer = ExamDetailsSerializer(
-            instance=query, data=request.data, partial=True)
+            instance=query, data=request.data, partial=True, context = {'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -156,5 +184,5 @@ class ExamKarNameView(APIView):
 
     def get(self, request):
         query = KarNameModel.objects.all()
-        srz_data = KarNameSerializer(query, many=True).data
+        srz_data = KarNameSerializer(query, many=True, context = {'request': request}).data
         return Response(srz_data, status.HTTP_200_OK)

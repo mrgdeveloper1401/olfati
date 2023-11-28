@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, LitnerKarNameDBModel, LitnerModel, \
-    LitnerAnswer
+    LitnerAnswer, MyLitnerclass
 from accounts.serializer import UserSerializers
 
 
@@ -18,18 +18,40 @@ class LitnerQuestionSerializer(serializers.ModelSerializer):
 
 class LitnerSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
-
+    have_karname = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = LitnerModel
         fields = "__all__"
+    def get_have_karname(self, obj):
+        request = self.context.get("request")
+        return obj.have_karname(request.user)
+
+class MyLitnerClassSerializer(serializers.ModelSerializer):
+    litners = LitnerSerializer(many=True, read_only=True)
+    class Meta: 
+        model = MyLitnerclass
+        fields = '__all__'
+        read_only_fields = ['author']
+
+    def to_representation(self, instance):
+        request = self.context.get("request")
+        rep = super().to_representation(instance)
+        if not request.parser_context.get("kwargs").get("pk"):
+            rep.pop("litners", None)
+        return rep
+    
 
 
 class LitnerDetailSerializer(serializers.ModelSerializer):
     litner = LitnerQuestionSerializer(many=True)
-
+    have_karname = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = LitnerModel
-        fields = ("id", "title", "study_field", "author", "cover_image", "data_created", "litner",'is_open')
+        fields = ("id", "title", "cover_image", "data_created", "litner", "have_karname")
+
+    def get_have_karname(self, obj):
+        request = self.context.get("request")
+        return obj.have_karname(request.user)
 
     def create(self, validated_data):
         questions_data = validated_data.pop('litner', [])

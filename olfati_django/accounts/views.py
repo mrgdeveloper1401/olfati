@@ -55,13 +55,17 @@ class SendCode(APIView):
             return Response({'status': status.HTTP_400_BAD_REQUEST, 'message': 'Invalid phone number.'})
         try:
             code = Helper.generate_otp_code()
-            api_key = '68664A5153554961366569533949395878794951444D2F77732F7378523737783070482B4D434F516549513D'
-            params = {'sender': '10008663', 'receptor': phone_number,
-                      'message': f'کدتایید شما: \n {code}'}
-            api = KavenegarAPI(api_key)
-            api.sms_send(params)
+            api_key = '366A34417873646451665051752B6B4A4F784B77484E50344B68374434346E53684F387558346D717349773D'
+            params = {
+                    'receptor': phone_number,
+                    'template': 'verify',
+                    'token': code,
+                    'type': 'sms',  # sms vs call
+                }
+            api = KavenegarAPI(api_key)  
+            api.verify_lookup(params)
             OtpModel.objects.create(phone_number=phone_number, otpCode=code)
-            return Response({'message': f'Code Sent! {code}'}, status.HTTP_200_OK)
+            return Response({'message': 'Code Sent!'}, status.HTTP_200_OK)
         except Exception as e:
             error_message = str(e)
             decoded_error_message = codecs.decode(

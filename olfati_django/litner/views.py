@@ -3,9 +3,38 @@ from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel, MyLitnerclass
+from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerTakeExamSerializer, MyLitnerClassSerializer
 
-from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel
-from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerTakeExamSerializer
+
+class ListCreateMyClassView(ModelViewSet):
+    permission_classes = [IsAuthenticated,]
+    serializer_class = MyLitnerClassSerializer
+    queryset = MyLitnerclass.objects.all()
+
+    def get_serializer_class(self):
+        return MyLitnerClassSerializer
+            
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context = {'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"data":serializer.data})
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data.get('litners', None)
+        return Response({"data":data})
 
 
 class LitnerListView(APIView):
@@ -15,16 +44,16 @@ class LitnerListView(APIView):
         if pk is None:
             try:
                 leitners = LitnerModel.objects.all()
-                serializer = LitnerSerializer(leitners, many=True)
+                serializer = LitnerSerializer(leitners, many=True, context = {'request': request})
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
                 return Response({'message': str(ins)},status.HTTP_404_NOT_FOUND)
         else:
             try:
                 leitners = LitnerModel.objects.get(pk=pk)
-                serializer = LitnerDetailSerializer(leitners)
-                serializer = LitnerDetailSerializer(leitners)
-                return Response({'data': serializer.data}, status.HTTP_200_OK)
+                serializer = LitnerDetailSerializer(leitners, context = {'request': request})
+                data = serializer.data.get("litner")
+                return Response({'data': data}, status.HTTP_200_OK)
             except Exception as ins:
                 return Response({'message': 'Leitner notFound'}, status.HTTP_404_NOT_FOUND)
 
@@ -32,7 +61,6 @@ class LitnerListView(APIView):
 
         exam = get_object_or_404(LitnerModel, pk=pk)
         try:
-            exam.is_open = True
             karname = LitnerKarNameModel.objects.get(user=request.user, exam_id=exam)
             answers = LitnerKarNameDBModel.objects.filter(karname=karname)
             is_corrects = []
@@ -45,21 +73,21 @@ class LitnerListView(APIView):
                         is_corrects.append(
                             {
                                 'question_id': answer.question.id,
-                                # 'question_text': answer.question.question_text,
-                                # 'answer_text': answer.answerss
+                                'question_text': answer.question.question_text,
+                                'answer_text': answer.question.answers_text
                             })
                     else:
                         if answer.is_correct == False:
                             is_false.append({
                                 'question_id': answer.question.id,
-                                # 'question_text': answer.question.question_text,
-                                # 'answer_text': answer.answerss
+                                'question_text': answer.question.question_text,
+                                'answer_text': answer.question.answers_text
                             })
                 else:
                     is_null.append({
                         'question_id': answer.question.id,
-                        # 'question_text': answer.question.question_text,
-                        # 'answer_text': answer.answerss
+                        'question_text': answer.question.question_text,
+                        'answer_text': answer.question.answers_text
                     })
             result = {
                 'True answers': is_corrects,
@@ -121,7 +149,7 @@ class LitnerView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request):
-        data = LitnerDetailSerializer(data=request.data)
+        data = LitnerDetailSerializer(data=request.data, context = {'request': request})
         data.is_valid(raise_exception=True)
         data.save()
         return Response(data.data)
