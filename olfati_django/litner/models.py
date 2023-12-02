@@ -1,6 +1,5 @@
 from django.db import models
 from accounts.models import UserModel
-
 from utils.vlaidations import validate_image_size
 
 
@@ -29,6 +28,17 @@ class LitnerModel(models.Model):
                                     verbose_name='عکس کاور')
     data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
     myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE, verbose_name='کلاس')
+    price = models.SmallIntegerField()
+    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True)
+
+    
+    @property
+    def author (self):
+        return self.myclass.author
+
+
+    def is_paid_user(self, user):
+        return self.paid_users.filter(id=user.id).exists()
 
     def have_karname(self, user):
         return LitnerKarNameModel.objects.filter(user=user).exists()
