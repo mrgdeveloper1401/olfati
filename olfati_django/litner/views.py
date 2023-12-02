@@ -8,6 +8,8 @@ from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel,
 from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerTakeExamSerializer, MyLitnerClassSerializer
 
 
+permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
+
 class ListCreateMyClassView(ModelViewSet):
     permission_classes = [IsAuthenticated,]
     serializer_class = MyLitnerClassSerializer
@@ -35,6 +37,14 @@ class ListCreateMyClassView(ModelViewSet):
         serializer = self.get_serializer(instance)
         data = serializer.data.get('litners', None)
         return Response({"data":data})
+    
+
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.is_author(request.user):
+            return permission_error
+        return super().destroy(request, *args, **kwargs)
 
 
 class LitnerListView(APIView):
