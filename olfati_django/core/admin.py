@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
+from django import forms
 
 from accounts.models import OtpModel, UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
 from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel
-from markethub.models import MarketHubModel, MarketHubQuestionModel,MarketHubKarNameModel, MarketHubKarNameDBModel, Myclass
-
+from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
+    Myclass
 
 
 @admin.register(UserModel)
@@ -70,6 +71,7 @@ class UserAdmin(admin.ModelAdmin):
     # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
     # list_filter = ('is_active', "studyField",)
 
+
 @admin.register(KarNameDBModel)
 class UserAdmin(admin.ModelAdmin):
     pass
@@ -109,33 +111,55 @@ class LogEntryAdmin(admin.ModelAdmin):
     search_fields = ("user__username",)
 
 
-
-
-
 @admin.register(MarketHubKarNameModel)
 class karnameAdmin(admin.ModelAdmin):
     pass
-# class UserAdmin(admin.ModelAdmin):
 
+
+# class UserAdmin(admin.ModelAdmin):
 
 
 @admin.register(MarketHubKarNameDBModel)
 class MarketHubKarNameDBModelAdmin(admin.ModelAdmin):
     pass
+
+
+class MyLitnerclassAdminForm(forms.ModelForm):
+    class Meta:
+        model = MyLitnerclass
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filter the queryset for the 'author' field to show only staff users
+        self.fields['author'].queryset = UserModel.objects.filter(is_staff=True)
+
 # class UserAdmin(admin.ModelAdmin):
 @admin.register(MyLitnerclass)
 class MyLitnerclassAdmin(admin.ModelAdmin):
-    pass
+    form = MyLitnerclassAdminForm
+
+
+class MyExamClassAdminForm(forms.ModelForm):
+    class Meta:
+        model = MyExamClass
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filter the queryset for the 'author' field to show only staff users
+        self.fields['author'].queryset = UserModel.objects.filter(is_staff=True)
+
 
 @admin.register(MyExamClass)
 class MyExamClassAdmin(admin.ModelAdmin):
-    pass
-
+    form = MyExamClassAdminForm
 
 
 @admin.register(Myclass)
 class MyclassAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(LitnerKarNameDBModel)
 class LitnerKarNameDBModelAdmin(admin.ModelAdmin):

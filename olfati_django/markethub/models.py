@@ -14,7 +14,7 @@ class MarketHubModel(models.Model):
     title = models.CharField(max_length=100)
     description = models.CharField(max_length=100)
     cover_image = models.ImageField(upload_to='media/markethub_image_cover/', null=True)
-    price = models.IntegerField()
+    price = models.SmallIntegerField()
     myclass = models.ForeignKey(Myclass, related_name='markethubs', on_delete=models.CASCADE)
     data_created = models.DateTimeField(auto_now_add=True)
     paid_users = models.ManyToManyField(UserModel, related_name='paid_market_hubs', blank=True)

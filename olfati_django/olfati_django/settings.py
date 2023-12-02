@@ -165,3 +165,5 @@ SIMPLE_JWT = {
 REDIRECTURL = "https://olfati.iran.liara.run"
 CALLBACKURL = 'http://{REDIRECTURL}/markethub/zarrin-pall/verify/'
 MERCHANT = "7bd2714c-3674-4566-a4ff-8ec4ed9fac64"
+
+LANGUAGE_CODE = 'fa'
