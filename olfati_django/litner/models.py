@@ -10,7 +10,7 @@ class MyLitnerclass(models.Model):
         verbose_name_plural = 'کلاس ها'
 
     title = models.TextField(verbose_name="عنوان")
-    study_field = models.CharField(max_length=100, verbose_name="فیلد مطالعه")
+    study_field = models.CharField(max_length=100, verbose_name="رشته تحصیلی")
     cover_image = models.ImageField(upload_to='media/classes_image_cover/', null=True, validators=[validate_image_size],
                                     verbose_name="عکس کاور")
     author = models.ForeignKey(UserModel, on_delete=models.PROTECT, verbose_name="نویسنده")
@@ -43,8 +43,8 @@ class LitnerQuestionModel(models.Model):
         verbose_name_plural = 'سوالات'
 
     litner = models.ForeignKey(LitnerModel, on_delete=models.CASCADE, related_name='litner', verbose_name="فصل")
-    question_text = models.TextField(verbose_name="متن سوال")
-    answers_text = models.TextField(verbose_name="متن جواب")
+    question_text = models.TextField(verbose_name="سوال را وارد کنید")
+    answers_text = models.TextField(verbose_name="جواب را وارد کنید")
 
     def __str__(self):
         return f"{self.question_text} | {self.answers_text}"
