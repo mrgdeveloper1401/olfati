@@ -1,6 +1,6 @@
 from django.urls import path
 
-from litner.views import LitnerListView, LitnerView, ListCreateMyClassView
+from litner.views import LitnerListView, LitnerView, ListCreateMyClassView,LitnerTakingExam
 
 urlpatterns = [
     path('class-list/', ListCreateMyClassView.as_view({'get': 'list'})),
@@ -9,6 +9,7 @@ urlpatterns = [
     path("<int:pk>", LitnerListView.as_view()),
     path("list/<int:pk>/", LitnerListView.as_view()),
     path("", LitnerView.as_view()),
+    path('list/<int:pk>/', LitnerTakingExam.as_view()),
    # path("kar-name/", LitnerKarNameView.as_view())
 
 ]
