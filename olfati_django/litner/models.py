@@ -28,8 +28,8 @@ class LitnerModel(models.Model):
                                     verbose_name='عکس کاور')
     data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
     myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE, verbose_name='کلاس')
-    price = models.SmallIntegerField()
-    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True)
+    price = models.SmallIntegerField(null=True)
+    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,null=True)
 
     
     @property
