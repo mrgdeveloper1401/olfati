@@ -8,4 +8,4 @@ def validate_image_size(value):
     max_size = size * 1024 * 1024
 
     if value.size > max_size:
-        raise ValidationError(f'{size}محدودیت سایز تا حداکثر MB')
+        raise ValidationError(f'محدودیت سایز تا حداکثر {size} مگابایت')

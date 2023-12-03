@@ -17,33 +17,33 @@ class MyLitnerclass(models.Model):
     def __str__(self):
         return self.title
 
-
-class LitnerModel(models.Model):
-    class Meta:
-        verbose_name = 'فصل'
-        verbose_name_plural = 'فصل ها'
-
-    title = models.TextField(verbose_name='عنوان')
-    cover_image = models.ImageField(upload_to='media/litner_image_cover/', null=True, validators=[validate_image_size],
-                                    verbose_name='عکس کاور')
-    data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
-    myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE, verbose_name='کلاس')
-    price = models.SmallIntegerField(null=True)
-    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,null=True)
-
-    
-    @property
-    def author (self):
-        return self.myclass.author
-
-
-    def is_paid_user(self, user):
-        return self.paid_users.filter(id=user.id).exists()
-
-    def have_karname(self, user):
-        return LitnerKarNameModel.objects.filter(user=user).exists()
-
-    def __str__(self):
+class LitnerModel(models.Model): 
+    class Meta: 
+        verbose_name = 'فصل' 
+        verbose_name_plural = 'فصل ها' 
+ 
+    title = models.TextField(verbose_name='عنوان') 
+    description = models.TextField(max_length=100,null=True) 
+    cover_image = models.ImageField(upload_to='media/litner_image_cover/', null=True, validators=[validate_image_size], 
+                                    verbose_name='عکس کاور') 
+    price = models.SmallIntegerField(null=True,verbose_name='قیمیت فصل') 
+    myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE, verbose_name='کلاس مربوطه') 
+    data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد') 
+    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,null=True,verbose_name='دسترسی کاربران') 
+ 
+     
+    @property 
+    def author (self): 
+        return self.myclass.author 
+ 
+ 
+    def is_paid_user(self, user): 
+        return self.paid_users.filter(id=user.id).exists() 
+ 
+    def have_karname(self, user): 
+        return LitnerKarNameModel.objects.filter(user=user).exists() 
+ 
+    def __str__(self): 
         return self.title
 
 
