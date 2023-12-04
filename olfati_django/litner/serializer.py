@@ -67,12 +67,14 @@ class MyLitnerClassSerializer(serializers.ModelSerializer):
 
 
 class LitnerDetailSerializer(serializers.ModelSerializer):
-    litner = LitnerQuestionSerializer(many=True)
+    questions = LitnerQuestionSerializer(many=True, read_only=True)
     have_karname = serializers.SerializerMethodField(read_only=True)
     is_paid = serializers.SerializerMethodField(read_only=True)
+    author = serializers.SlugRelatedField(slug_field="full_name", read_only=True)
+    is_author = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = LitnerModel
-        fields = ("id", "title", "cover_image", "data_created", "litner", "have_karname","is_paid","price")
+        fields = ("id", "title", "cover_image", "data_created", "have_karname","is_paid","price","question","author",'is_author','myclass')
     
 
     def get_is_paid(self, obj):
@@ -82,13 +84,22 @@ class LitnerDetailSerializer(serializers.ModelSerializer):
     def get_have_karname(self, obj):
         request = self.context.get("request")
         return obj.have_karname(request.user)
+    
 
+    def get_is_author(self, obj):
+        request = self.context.get("request")
+        return obj.is_author(request.user)
+    
     def create(self, validated_data):
-        questions_data = validated_data.pop('litner', [])
+        myclass = validated_data.get('myclass', None)
+        request = self.context.get("request")
+        if not myclass.author == request.user:
+            return PermissionError("اجازه اینکار را ندارید")
+        questions_data = validated_data.pop('questions', [])
         litner = LitnerModel.objects.create(**validated_data)
         for question in questions_data:
-            print(question)
-            LitnerQuestionModel.objects.create(litner=litner, **question)
+            question.pop('id', None)
+            LitnerQuestionModel.objects.create(**question, litner=litner)
         return litner
 
 

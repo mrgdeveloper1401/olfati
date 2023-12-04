@@ -39,7 +39,13 @@ class ListCreateMyClassView(ModelViewSet):
         return Response({"data":data})
     
 
-
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if not instance.is_author(request.user):
+            return permission_error
+        return super().partial_update(request, *args, **kwargs)
+    
+    
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if not instance.is_author(request.user):
@@ -248,10 +254,9 @@ class LitnerTakingExam(APIView):
                 serializer = LitnerDetailSerializer(litner, context={'request': request, 'exam': pk}) 
                 return Response({'data': serializer.data}, status.HTTP_200_OK) 
             except Exception as ins: 
-                return Response({'message': 'Leitner notFound'}, status.HTTP_404_NOT_FOUND) 
+                return Response({'message': 'litner notFound'}, status.HTTP_404_NOT_FOUND) 
  
     def post(self, request, pk): 
- 
         exam = get_object_or_404(LitnerModel, pk=pk) 
         try: 
             karname = LitnerKarNameModel.objects.get(user=request.user, exam_id=exam) 
@@ -303,14 +308,6 @@ class LitnerTakingExam(APIView):
                 return Response(serializer.errors, status.HTTP_404_NOT_FOUND) 
  
     def put(self, request, pk): 
-        # request.data example: you should send new questions and their choices  
-        # [ 
-        #     { 
-        #         "question":1,    #our questuin 
-        #         "choice":2      #client's answer 
-        #     }, 
-        #     ... 
-        # ] 
         data = {'user': request.user.id, "exam_id": pk} 
         if request.data: 
             data['karname'] = request.data 
