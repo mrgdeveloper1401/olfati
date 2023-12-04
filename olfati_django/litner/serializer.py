@@ -74,7 +74,7 @@ class LitnerDetailSerializer(serializers.ModelSerializer):
     is_author = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = LitnerModel
-        fields = ("id", "title", "cover_image", "data_created", "have_karname","is_paid","price","question","author",'is_author','myclass')
+        fields = ("id", "title", "cover_image", "data_created", "have_karname","is_paid","price","question","author","is_author","myclass","description'")
     
 
     def get_is_paid(self, obj):
@@ -155,4 +155,4 @@ class LitnerTakeExamSerializer(serializers.ModelSerializer):
             answered.save()
         return karname
 
-    #
+    
