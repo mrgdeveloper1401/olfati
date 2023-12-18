@@ -18,19 +18,21 @@ class LitnerQuestionSerializer(serializers.ModelSerializer):
 
 class LitnerSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField()
+    myclass = serializers.SlugRelatedField(slug_field="id", read_only=True)
     have_karname = serializers.SerializerMethodField(read_only=True)
     is_paid = serializers.SerializerMethodField(read_only=True)
     is_author = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = LitnerModel
-        fields = "__all__"
-    def get_have_karname(self, obj):
-        request = self.context.get("request")
-        return obj.have_karname(request.user)
-    
+        fields =('id', 'title', 'description', 'cover_image', 'price', 'data_created', 'author', 'myclass', 'is_paid', 'have_karname', 'is_author')
+
     def get_is_paid(self, obj):
         request = self.context.get("request")
         return obj.is_paid_user(request.user) or obj.is_author(request.user)
+    
+    def get_have_karname(self, obj):
+        request = self.context.get("request")
+        return obj.have_karname(request.user)
     
 
     def get_is_author(self, obj):
