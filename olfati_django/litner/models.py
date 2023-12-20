@@ -42,6 +42,9 @@ class LitnerModel(models.Model):
  
     def have_karname(self, user): 
         return LitnerKarNameModel.objects.filter(user=user).exists() 
+    
+    def is_author(self, user):
+        return user.id == self.myclass.author.id
  
     def __str__(self): 
         return self.title
