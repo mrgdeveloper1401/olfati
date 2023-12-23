@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel, MyLitnerclass
 from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerTakeExamSerializer, MyLitnerClassSerializer
-
+from rest_framework import generics
 
 permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
 
@@ -326,3 +326,45 @@ class LitnerTakingExam(APIView):
             return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
         return Response(serializer.data)
 
+
+
+
+
+
+class ListProfileMyClassView(generics.ListAPIView):
+    serializer_class = MyLitnerClassSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        valid_objects = MyLitnerclass.objects.filter(markethubs__paid_users=self.request.user)
+        return valid_objects
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"data":serializer.data})
+    
+
+
+
+class ListProfileMyClassCreatorView(generics.ListAPIView):
+    serializer_class = MyLitnerClassSerializer
+    permission_classes = [IsAuthenticated]
+    def get_queryset(self):
+        valid_objects = MyLitnerclass.objects.filter(author=self.request.user)
+        return valid_objects
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({"data":serializer.data})
