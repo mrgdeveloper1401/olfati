@@ -4,9 +4,12 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel, MyLitnerclass
+from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel, MyLitnerclass,LitnerQuestionModel,UserQuestionAnswerCount,NotificationModel
 from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerTakeExamSerializer, MyLitnerClassSerializer
 from rest_framework import generics
+from django.utils import timezone
+from django.db.models import Q
+
 
 permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
 
@@ -52,7 +55,6 @@ class ListCreateMyClassView(ModelViewSet):
             return permission_error
         return super().destroy(request, *args, **kwargs)
 
-
 class LitnerListView(ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = LitnerModel.objects.all()
@@ -94,8 +96,9 @@ class LitnerListView(ModelViewSet):
         if not (instance.is_author(request.user) or instance.is_paid_user(request.user)):
             return permission_error
         serializer = self.get_serializer(instance)
-        data = serializer.data.get('questions')
+        data = serializer.data.get('question')
         return Response({'data':data})
+
 
 class LitnerView(APIView):
     permission_classes = [IsAdminUser]
@@ -118,131 +121,134 @@ class LitnerView(APIView):
     def put(self, request):
         pass
 
-# a = {
-#     'exam': 1,
-#     'user': 20,
-#     'answer': [
-#         {
-#             "id_question": 5,
-#             "choice": None  # null
-#         }
-#     ],
-#     # 'true_answer': [
-#     #     {
-#     #         "question_text": "سوال اول آزمون ریاضی که بود؟",
-#     #         "answers_text": "رضا"
-#     #     },
-#     #     {
-#     #         "question_text": "سوال 2 آزمون مامایی که بود؟",
-#     #         "answers_text": "احمد"
-#     #     },
-#     #     {
-#     #         "question_text": "سوال اول آزمون عربی که بود؟",
-#     #         "answers_text": "علی"
-#     #     },
-#     # ],
-#     # 'no_answer': [
-#     #     {
-#     #         "question_text": "امیر نمره ریاضیش چند بود؟",
-#     #         "answers_text": "10"
-#     #     },
-#     #     {
-#     #         "question_text": "سوال 2 آزمون مامایی که بود؟",
-#     #         "answers_text": "احمد"
-#     #     },
-#     #     {
-#     #         "question_text": "سوال اول آزمون عربی که بود؟",
-#     #         "answers_text": "علی"
-#     #     },
-#     # ],
-#     # 'false_answer': [
-#     #     {
-#     #         "question_text": "سوال اول آزمون ریاضی که بود؟",
-#     #         "answers_text": "رضا"
-#     #     },
-#     #     {
-#     #         "question_text": "سوال 2 آزمون مامایی که بود؟",
-#     #         "answers_text": "احمد"
-#     #     },
-#     #     {
-#     #         "question_text": "سوال اول آزمون عربی که بود؟",
-#     #         "answers_text": "علی"
-#     #     },
-#     # ],
-# }
 
-
-
-class LitnerTakingExam(APIView): 
-    permission_classes = [IsAuthenticated] 
- 
+class LitnerTakingExam(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, pk=None): 
         if pk is None: 
             try: 
-                litner = LitnerModel.objects.all() 
-                serializer =LitnerSerializer(litner, many=True) 
+                litners = LitnerModel.objects.all() 
+                serializer = LitnerSerializer(litners, many=True) 
                 return Response({'data': serializer.data}, status.HTTP_200_OK) 
             except Exception as ins: 
-                return Response({'message': str(ins)},status.HTTP_404_NOT_FOUND) 
+                return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND) 
+
         else: 
             try: 
-                litner = LitnerModel.objects.get(myclass_id=pk, paid_users=self.request.user) 
-                serializer = LitnerDetailSerializer(litner, context={'request': request, 'exam': pk}) 
+                # Get the litner instance for the specified class id and the user
+                litner = LitnerModel.objects.get(myclass_id=pk, paid_users=self.request.user)
+                
+                # Fetch questions for this litner
+                questions = LitnerQuestionModel.objects.filter(litner=litner)
+                
+                # Get the count of how many times the user answered each question correctly
+                user_question_answer_counts = UserQuestionAnswerCount.objects.filter(user=request.user, question__in=questions)
+
+                if user_question_answer_counts.exists():  
+                    # Get the question IDs of those the user answered less than 6 times correctly
+                    question_ids_with_correct_counts = user_question_answer_counts.filter(correct_answer_count__lt=6, is_hide=False).values_list('question_id', flat=True)
+                    
+                    if question_ids_with_correct_counts.exists():
+                        questions_to_display = questions.filter(id__in=question_ids_with_correct_counts)
+                    else:
+                        # If there are no questions the user answered less than 6 times correctly, display all questions
+                        questions_to_display = questions
+                else:
+                    # If no recorded answers are found, display all questions
+                    questions_to_display = questions
+
+                serializer = LitnerDetailSerializer(litner, context={'request': request, 'exam': pk, 'questions_to_display': questions_to_display}) 
+                
                 return Response({'data': serializer.data}, status.HTTP_200_OK) 
+
+            except LitnerModel.DoesNotExist:
+                return Response({'message': 'litner not found'}, status.HTTP_404_NOT_FOUND) 
             except Exception as ins: 
-                return Response({'message': 'litner notFound'}, status.HTTP_404_NOT_FOUND) 
- 
-    def post(self, request, pk): 
-        exam = get_object_or_404(LitnerModel, pk=pk) 
-        try: 
-            karname = LitnerKarNameModel.objects.get(user=request.user, exam_id=exam) 
-            answers = LitnerKarNameDBModel.objects.filter(karname=karname) 
-            is_corrects = [] 
-            is_false = [] 
-            is_null = [] 
-            for answer in answers: 
-                if not answer.is_correct is None: 
-                    if answer.is_correct == True: 
-                        is_corrects.append( 
-                            { 
-                                'question_id': answer.question.id, 
-                                'question_text': answer.question.question_text, 
-                                'answer_text': answer.question.answers_text 
-                            }) 
-                    else: 
-                        if answer.is_correct == False: 
-                            is_false.append({ 
-                                'question_id': answer.question.id, 
-                                'question_text': answer.question.question_text, 
-                                'answer_text': answer.question.answers_text 
-                            }) 
-                else: 
-                    is_null.append({ 
-                        'question_id': answer.question.id, 
-                        'question_text': answer.question.question_text, 
-                        'answer_text': answer.question.answers_text 
-                    }) 
-            result = { 
-                'True answers': is_corrects, 
-                'False answers': is_false, 
-                'None answers': is_null 
-            } 
-            exam.save() 
-            return Response(result) 
- 
-        except: 
-            data = {'user': request.user.id, "exam_id": pk} 
-            if request.data: 
-                data['karname'] = request.data 
-            else: 
-                data['karname'] = [] 
-            serializer = LitnerTakeExamSerializer(data=data, context={'request': request, 'exam': pk}) 
-            if serializer.is_valid(): 
-                serializer.save() 
-                return Response(serializer.data, status.HTTP_200_OK) 
-            else: 
-                return Response(serializer.errors, status.HTTP_404_NOT_FOUND) 
- 
+                print(ins)
+                return Response({'message': 'An error occurred'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+        
+    def post(self, request, pk):
+     exam = get_object_or_404(LitnerModel, pk=pk)
+     try:
+        karname = LitnerKarNameModel.objects.get(user=request.user, exam_id=exam)
+        answers = LitnerKarNameDBModel.objects.filter(karname=karname)
+
+        is_corrects = []
+        is_false = []
+        is_null = []
+
+        for answer in answers:
+            if answer.is_correct is not None:
+                if answer.is_correct:
+                    is_corrects.append(answer)
+                else:
+                    is_false.append(answer)
+            else:
+                is_null.append(answer)
+
+        for answer in is_corrects:
+            question = answer.question
+            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+            # Increment correct_answer_count for the question
+            user_answer_count.correct_answer_count += 1
+            if user_answer_count.correct_answer_count>6:
+                user_answer_count.is_hide=True
+                user_answer_count.save()
+            user_answer_count.save()
+        
+        for answer in is_false:
+            question = answer.question
+            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+            notification,created = NotificationModel.objects.get_or_create(user=request.user,question=question)
+            notification.save()
+            user_answer_count.save()
+
+        for answer in is_null:
+            question = answer.question
+            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+            user_answer_count.save()
+
+            
+
+
+        result = {
+            'True answers': [{
+                'question_id': answer.question.id,
+                'question_text': answer.question.question_text,
+                'answer_text': answer.question.answers_text
+            } for answer in is_corrects if not answer.question.hide_question],
+            'False answers': [{
+                'question_id': answer.question.id,
+                'question_text': answer.question.question_text,
+                'answer_text': answer.question.answers_text
+            } for answer in is_false if not answer.question.hide_question],
+            'None answers': [{
+                'question_id': answer.question.id,
+                'question_text': answer.question.question_text,
+                'answer_text': answer.question.answers_text
+            } for answer in is_null if not answer.question.hide_question]
+        }
+        exam.save()
+        return Response(result)
+
+     except Exception as e:
+        # Error handling
+        data = {'user': request.user.id, "exam_id": pk}
+        if request.data:
+            data['karname'] = request.data
+        else:
+            data['karname'] = []
+
+        serializer = LitnerTakeExamSerializer(data=data, context={'request': request, 'exam': pk})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+        
+        
     def put(self, request, pk): 
         data = {'user': request.user.id, "exam_id": pk} 
         if request.data: 
@@ -261,6 +267,8 @@ class LitnerTakingExam(APIView):
         else:
             return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
         return Response(serializer.data)
+
+
 
 
 

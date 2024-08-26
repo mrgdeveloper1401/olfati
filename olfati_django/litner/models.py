@@ -1,6 +1,10 @@
 from django.db import models
 from accounts.models import UserModel
 from utils.vlaidations import validate_image_size
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .tasks import send_notification_task
+
 
 
 class MyLitnerclass(models.Model):
@@ -29,13 +33,11 @@ class LitnerModel(models.Model):
     price = models.SmallIntegerField(null=True,verbose_name='قیمیت فصل') 
     myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE, verbose_name='کلاس مربوطه') 
     data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد') 
-    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,null=True,verbose_name='دسترسی کاربران') 
- 
-     
+    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,verbose_name='دسترسی کاربران') 
+
     @property 
     def author (self): 
         return self.myclass.author 
- 
  
     def is_paid_user(self, user): 
         return self.paid_users.filter(id=user.id).exists() 
@@ -55,12 +57,20 @@ class LitnerQuestionModel(models.Model):
         verbose_name = 'سوال'
         verbose_name_plural = 'سوالات'
 
-    litner = models.ForeignKey(LitnerModel, on_delete=models.CASCADE, related_name='litner', verbose_name="فصل")
-    question_text = models.TextField(verbose_name="سوال را وارد کنید")
-    answers_text = models.TextField(verbose_name="جواب را وارد کنید")
+    litner = models.ForeignKey(LitnerModel, on_delete=models.CASCADE, related_name='question', verbose_name="فصل")
+    question_text = models.CharField(max_length=200,verbose_name="سوال را وارد کنید")
+    answers_text = models.CharField(max_length=200,verbose_name="جواب را وارد کنید")
+    hide_question = models.BooleanField(default=False)
+ 
 
-    def __str__(self):
-        return f"{self.question_text} | {self.answers_text}"
+class UserQuestionAnswerCount(models.Model):
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="کاربر")
+    question = models.ForeignKey(LitnerQuestionModel,on_delete=models.CASCADE , verbose_name="سوال")
+    correct_answer_count = models.IntegerField(default=0)
+    is_hide = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user','question')  # Ensure that each user can only have one count for each question
 
 
 class LitnerKarNameModel(models.Model):
@@ -82,3 +92,19 @@ class LitnerKarNameDBModel(models.Model):
     question = models.ForeignKey(LitnerQuestionModel, on_delete=models.PROTECT, related_name='question_id')
     is_correct = models.BooleanField(null=True)
     karname = models.ForeignKey(LitnerKarNameModel, on_delete=models.PROTECT, related_name="karname")
+
+
+class NotificationModel(models.Model):
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="کاربر")
+    question = models.ForeignKey(LitnerQuestionModel,on_delete=models.CASCADE , verbose_name="سوال")
+
+
+
+
+@receiver(post_save, sender=NotificationModel)
+def schedule_notification(sender, instance, created, **kwargs):
+    if created:
+        print("send notiffffffffffffffffffffffffffffffffff")
+        # 24 ساعت بعد از ایجاد
+        send_notification_task.apply_async((instance.id, ['YOUR_DEVICE_TOKEN']), countdown=86400) # توکن‌های دستگاه‌ها را در اینجا قرار دهید.
+        print("signal send")

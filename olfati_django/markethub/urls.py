@@ -84,5 +84,6 @@ urlpatterns = [
             # ]
     # امتحان دادن و اصلاح یک فصل
     path('list/<int:pk>/', MarketHubTakingExam.as_view()),
+    path('list/', MarketHubTakingExam.as_view()),
     
 ]

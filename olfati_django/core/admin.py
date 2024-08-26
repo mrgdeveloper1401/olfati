@@ -4,96 +4,80 @@ from django import forms
 
 from accounts.models import OtpModel, UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
-from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel
+from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel,LitnerAnswer,UserQuestionAnswerCount,NotificationModel
 from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
     Myclass
 
 
 @admin.register(UserModel)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ("username", "phone_number", "melli_code", "study_field", "is_active", "is_staff", "date_joined")
-    search_fields = ("username", "phone_number", "melli_code", 'study_field',)
-    list_filter = ('is_active', "study_field",)
+    list_display = ('full_name', 'study_field', 'username', 'phone_number', 'melli_code', 'is_staff', 'date_joined')
+    search_fields = ('full_name','username', 'phone_number', 'melli_code', 'study_field')
+    list_filter = ('is_active', 'study_field')
 
+    fieldsets = (
+        ('اطلاعات شخصی', {'fields': ('full_name','study_field','username','melli_code','phone_number')}),
+        #('دسترسی‌ها', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('گزارش تاریخ', {'fields': ('last_login', 'date_joined')}),
+    )
 
+    
 @admin.register(LitnerModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
+
+@admin.register(LitnerAnswer)
+class UserAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(LitnerQuestionModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
+
+@admin.register(UserQuestionAnswerCount)
+class UserQuestionAnswerCountAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(MarketHubModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(MarketHubQuestionModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(LitnerKarNameModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(ExamModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(KarNameModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(KarNameDBModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(ChoiceModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(QuestionModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-    # list_display = ("username", "phone_number", "MelliCode", "studyField", "is_active", "created_at")
-    # search_fields = ("username", "phone_number", "MelliCode", 'studyField',)
-    # list_filter = ('is_active', "studyField",)
 
 
 @admin.register(OtpModel)
@@ -162,5 +146,9 @@ class MyclassAdmin(admin.ModelAdmin):
 
 
 @admin.register(LitnerKarNameDBModel)
+class LitnerKarNameDBModelAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(NotificationModel)
 class LitnerKarNameDBModelAdmin(admin.ModelAdmin):
     pass

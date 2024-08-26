@@ -1,13 +1,15 @@
 import codecs
 from random import randint
 from sqlite3 import IntegrityError
+from django.contrib.auth.models import Group
 
 from kavenegar import KavenegarAPI
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.contrib.auth import authenticate
+from rest_framework.permissions import AllowAny
 from .models import OtpModel, UserModel
 from .serializer import OtpSerializers, UserSerializers
 
@@ -96,3 +98,69 @@ class VerifyOTPView(APIView):
             except OtpModel.DoesNotExist:
                 return Response({'message': 'OTP code not valid'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({'message': serializer.errors}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class AdminLoginView(APIView):
+  #  permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+       # password = request.data.get('password')
+        user = authenticate(username=username)
+        if user is not None and user.is_superuser:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        else:
+            return Response({'error': 'Invalid Credentials or Not Superuser'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class ResetPasswordView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        new_password = request.data.get('new_password')
+        try:
+            user = UserModel.objects.get(username=username)
+            user.set_password(new_password)
+            user.save()
+
+            # اضافه کردن کاربر به گروه مورد نظر (مثلاً گروه staff)
+            staff_group = Group.objects.get(name='teacher')  # فرضاً که گروهی به نام staff وجود دارد
+            user.groups.add(staff_group)
+
+            return Response({'message': 'Password reset successfully. User now has access to admin panel.'})
+        except UserModel.DoesNotExist:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        
+class EditProfileView(APIView):
+ def post(self, request):
+       # if not request.user.is_superuser:
+        #    return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        
+        username = request.data.get('username')
+        new_username = request.data.get('new_username', None)
+        first_name = request.data.get('first_name', None)
+        last_name = request.data.get('last_name', None)
+        study_field = request.data.get('study_field', None)
+        melli_code = request.data.get('melli_code', None)
+        phone_number = request.data.get('phone_number', None)
+        try:
+            user = UserModel.objects.get(username=username)
+            if new_username:
+                user.username = new_username
+            if last_name:
+                user.last_name = last_name
+            if first_name:
+                user.first_name = first_name
+            if study_field:
+                user.study_field = study_field
+            if melli_code:
+                user.melli_code = melli_code
+            if phone_number:
+                user.phone_number = phone_number
+            user.save()
+            # سریالایز و برگرداندن داده‌های کاربر
+            user_data = UserSerializers(user).data
+            return Response({'message': 'Profile updated successfully', 'data': user_data})
+        except UserModel.DoesNotExist:
+            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)

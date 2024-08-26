@@ -11,15 +11,22 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+
 DATABASES = {
-    'default': {
-        # 'ENGINE': 'django.db.backends.postgresql',
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+   'default': {
+       'ENGINE': os.getenv("DB_ENGINE"),
+       'NAME': os.getenv("DB_DATABASE"),
+       'USER': os.getenv("DB_USERNAME"),
+       'PASSWORD': os.getenv("DB_PASSWORD"),
+       'HOST': os.getenv("DB_HOST"),
+       'PORT':  os.getenv("DB_PORT"),
     }
 }
 
@@ -32,7 +39,17 @@ SECRET_KEY = 'django-insecure-ira0@ix)3pip7)de1=!e1qfa#hizidv0@g2fffm7a&h=lahrbz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ["https://cartino.chbk.run","cartino.chbk.run"]
+#CSRF_TRUSTED_ORIGINS = ["https://cartino.chbk.run","cartino.chbk.run"]
+
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'
+
+
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static'
+
 
 # Application definition
 
@@ -50,7 +67,9 @@ INSTALLED_APPS = [
     'exam',
     "core",
     "litner",
-    "markethub"
+    "markethub",
+    "django_celery_results",
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -90,11 +109,11 @@ AUTH_USER_MODEL = 'accounts.UserModel'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+#      'default': {
+#          'ENGINE': 'django.db.backends.sqlite3',
+#          'NAME': BASE_DIR / 'db.sqlite3',
+#      }
+#  }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -167,3 +186,41 @@ CALLBACKURL = 'http://{REDIRECTURL}/markethub/zarrin-pall/verify/'
 MERCHANT = "7bd2714c-3674-4566-a4ff-8ec4ed9fac64"
 
 LANGUAGE_CODE = 'fa'
+
+
+
+
+
+
+
+# مسیر به کلید خصوصی دانلود شده
+FIREBASE_ADMIN_KEY_PATH = os.path.join(BASE_DIR, 'firebase_admin_key.json')
+
+BROKER_URL = 'redis://:Fig3GFX9dLysKjUO@services.gen3.chabokan.net:46524/0'
+CELERY_RESULT_BACKEND = 'redis://:Fig3GFX9dLysKjUO@services.gen3.chabokan.net:46524/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tehran'
+
+# # CELERY SETTINGS
+# CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_BACKEND = 'django-db'
+# CELERY_TIMEZONE = 'Asia/Tehran'
+
+# # CELERY BEAT SCHEDULER
+# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# # REDIS CACHE
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": f"redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         },
+#     }
+# }
