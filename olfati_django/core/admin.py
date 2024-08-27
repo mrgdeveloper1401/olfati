@@ -4,7 +4,7 @@ from django import forms
 
 from accounts.models import OtpModel, UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
-from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel,LitnerAnswer,UserQuestionAnswerCount,NotificationModel
+from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel,LitnerAnswer,UserQuestionAnswerCount
 from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
     Myclass
 
@@ -146,9 +146,5 @@ class MyclassAdmin(admin.ModelAdmin):
 
 
 @admin.register(LitnerKarNameDBModel)
-class LitnerKarNameDBModelAdmin(admin.ModelAdmin):
-    pass
-
-@admin.register(NotificationModel)
 class LitnerKarNameDBModelAdmin(admin.ModelAdmin):
     pass

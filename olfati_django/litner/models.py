@@ -1,10 +1,10 @@
+from datetime import timedelta
 from django.db import models
 from accounts.models import UserModel
 from utils.vlaidations import validate_image_size
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .tasks import send_notification_task
-import logging
+
 
 
 
@@ -34,7 +34,7 @@ class LitnerModel(models.Model):
     price = models.SmallIntegerField(null=True,verbose_name='قیمیت فصل') 
     myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE, verbose_name='کلاس مربوطه') 
     data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد') 
-    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,verbose_name='دسترسی کاربران') 
+    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,null=True,verbose_name='دسترسی کاربران') 
 
     @property 
     def author (self): 
@@ -67,8 +67,9 @@ class LitnerQuestionModel(models.Model):
 class UserQuestionAnswerCount(models.Model):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="کاربر")
     question = models.ForeignKey(LitnerQuestionModel,on_delete=models.CASCADE , verbose_name="سوال")
-    correct_answer_count = models.IntegerField(default=0)
-    is_hide = models.BooleanField(default=False)
+    is_correctt = models.BooleanField(default=False,null=True)
+    answered_at = models.DateTimeField(auto_now_add=True,null=True)
+
 
     class Meta:
         unique_together = ('user','question')  # Ensure that each user can only have one count for each question
@@ -94,16 +95,3 @@ class LitnerKarNameDBModel(models.Model):
     is_correct = models.BooleanField(null=True)
     karname = models.ForeignKey(LitnerKarNameModel, on_delete=models.PROTECT, related_name="karname")
 
-
-class NotificationModel(models.Model):
-    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="کاربر")
-    question = models.ForeignKey(LitnerQuestionModel,on_delete=models.CASCADE , verbose_name="سوال")
-
-
-logger = logging.getLogger(__name__)
-@receiver(post_save, sender=NotificationModel)
-def schedule_notification(sender, instance, created, **kwargs):
-    if created:
-        device_tokens = ['1:122524621760:android:b983fc48ca1c7baf7a4625']
-        send_notification_task.apply_async((instance.id, device_tokens), countdown=30) 
-        logger.info("Notification signal sent.")

@@ -4,12 +4,14 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel, MyLitnerclass,LitnerQuestionModel,UserQuestionAnswerCount,NotificationModel
+from litner.models import LitnerModel, LitnerKarNameModel, LitnerKarNameDBModel, MyLitnerclass,LitnerQuestionModel,UserQuestionAnswerCount
 from litner.serializer import LitnerSerializer, LitnerDetailSerializer, LitnerTakeExamSerializer, MyLitnerClassSerializer
 from rest_framework import generics
 from django.utils import timezone
 from django.db.models import Q
-
+from django.utils import timezone
+from datetime import timedelta
+from .tasks import send_notification_task
 
 permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
 
@@ -124,7 +126,7 @@ class LitnerView(APIView):
 
 
 class LitnerTakingExam(APIView):
-    permission_classes = [IsAuthenticated]
+  #  permission_classes = [IsAuthenticated]
     def get(self, request, pk=None): 
         if pk is None: 
             try: 
@@ -136,23 +138,21 @@ class LitnerTakingExam(APIView):
 
         else: 
             try: 
-                # Get the litner instance for the specified class id and the user
                 litner = LitnerModel.objects.get(myclass_id=pk, paid_users=self.request.user)
                 
                 # Fetch questions for this litner
                 questions = LitnerQuestionModel.objects.filter(litner=litner)
                 
                 # Get the count of how many times the user answered each question correctly
-                user_question_answer_counts = UserQuestionAnswerCount.objects.filter(user=request.user, question__in=questions)
+                user_question_answer_cheack = UserQuestionAnswerCount.objects.filter(user=request.user, question__in=questions,is_correctt=False)
 
-                if user_question_answer_counts.exists():  
+                if user_question_answer_cheack.exists():  
                     # Get the question IDs of those the user answered less than 6 times correctly
-                    question_ids_with_correct_counts = user_question_answer_counts.filter(correct_answer_count__lt=6, is_hide=False).values_list('question_id', flat=True)
+                    question_ids_with_correct_counts = user_question_answer_cheack.filter(user=request.user,is_correctt=False).values_list('question_id', flat=True)
                     
                     if question_ids_with_correct_counts.exists():
                         questions_to_display = questions.filter(id__in=question_ids_with_correct_counts)
                     else:
-                        # If there are no questions the user answered less than 6 times correctly, display all questions
                         questions_to_display = questions
                 else:
                     # If no recorded answers are found, display all questions
@@ -191,19 +191,15 @@ class LitnerTakingExam(APIView):
 
         for answer in is_corrects:
             question = answer.question
-            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
-            # Increment correct_answer_count for the question
-            user_answer_count.correct_answer_count += 1
-            if user_answer_count.correct_answer_count>6:
-                user_answer_count.is_hide=True
-                user_answer_count.save()
-            user_answer_count.save()
+            user_answer_check, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question,is_correctt=True)
+            user_answer_check.is_correctt == True
+            send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(days=3))
+            user_answer_check.save()
         
         for answer in is_false:
             question = answer.question
             user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
-            notification,created = NotificationModel.objects.get_or_create(user=request.user,question=question)
-            notification.save()
+            send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
             user_answer_count.save()
 
         for answer in is_null:
@@ -212,7 +208,6 @@ class LitnerTakingExam(APIView):
             user_answer_count.save()
 
             
-
 
         result = {
             'True answers': [{
@@ -250,24 +245,62 @@ class LitnerTakingExam(APIView):
             return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
         
         
-    def put(self, request, pk): 
-        data = {'user': request.user.id, "exam_id": pk} 
-        if request.data: 
-            data['karname'] = request.data 
-        else: 
-            data['karname'] = [] 
-        exam = get_object_or_404(LitnerModel, pk=pk) 
-        karname = get_object_or_404(LitnerKarNameModel, user=request.user, exam_id=exam) 
-        serializer = LitnerTakeExamSerializer(instance=karname, data=data, context={'request': request, 'exam': pk}, 
-                                              partial=True) 
-        if serializer.is_valid(): 
-            try:
-                serializer.save()
-            except Exception:
-                return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
-        else:
-            return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
-        return Response(serializer.data)
+    def put(self, request, pk):
+       data = {'user': request.user.id, "exam_id": pk}
+       if request.data:
+          data['karname'] = request.data
+       else:
+         data['karname'] = []
+
+       exam = get_object_or_404(LitnerModel, pk=pk)
+       karname = get_object_or_404(LitnerKarNameModel, user=request.user, exam_id=exam)
+
+    # Get the user's previous answers
+       answers = LitnerKarNameDBModel.objects.filter(karname=karname)
+
+       is_corrects = []
+       is_false = []
+  
+       for answer in answers:
+           if answer.is_correct is not None:
+               if answer.is_correct:
+                is_corrects.append(answer)
+           else:
+                is_false.append(answer)
+
+
+    # Increment correct_answer_count for correct answers
+       for answer in is_corrects:
+            question = answer.question
+            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+            user_answer_count.is_correctt = True  
+            user_answer_count.save()
+            print("11111")
+            send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body', eta=timezone.now() + timedelta(hours=24))
+
+            
+
+    # Handle false answers
+       for answer in is_false:
+           question = answer.question
+           user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+           user_answer_count.save()
+           send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
+
+
+    # Update or validate the serializer
+       serializer = LitnerTakeExamSerializer(instance=karname, data=data, context={'request': request, 'exam': pk}, partial=True)
+
+       if serializer.is_valid():
+          try:
+            serializer.save()
+            return Response(serializer.data)  # Respond with the updated data.
+          except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+       else:
+          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 
