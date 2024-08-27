@@ -95,7 +95,8 @@ class LitnerListView(ModelViewSet):
         instance = self.get_object()
         if not (instance.is_author(request.user) or instance.is_paid_user(request.user)):
             return permission_error
-        serializer = self.get_serializer(instance)
+        questions_to_display = LitnerQuestionModel.objects.filter(litner=instance)  # یا هر منطق دیگر
+        serializer = self.get_serializer(instance, context={'request': request, 'questions_to_display': questions_to_display})
         data = serializer.data.get('question')
         return Response({'data':data})
 

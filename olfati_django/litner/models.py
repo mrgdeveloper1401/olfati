@@ -4,6 +4,7 @@ from utils.vlaidations import validate_image_size
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .tasks import send_notification_task
+import logging
 
 
 
@@ -99,12 +100,10 @@ class NotificationModel(models.Model):
     question = models.ForeignKey(LitnerQuestionModel,on_delete=models.CASCADE , verbose_name="سوال")
 
 
-
-
+logger = logging.getLogger(__name__)
 @receiver(post_save, sender=NotificationModel)
 def schedule_notification(sender, instance, created, **kwargs):
     if created:
-        print("send notiffffffffffffffffffffffffffffffffff")
-        # 24 ساعت بعد از ایجاد
-        send_notification_task.apply_async((instance.id, ['YOUR_DEVICE_TOKEN']), countdown=86400) # توکن‌های دستگاه‌ها را در اینجا قرار دهید.
-        print("signal send")
+        device_tokens = ['1:122524621760:android:b983fc48ca1c7baf7a4625']
+        send_notification_task.apply_async((instance.id, device_tokens), countdown=30) 
+        logger.info("Notification signal sent.")

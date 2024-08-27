@@ -39,7 +39,7 @@ SECRET_KEY = 'django-insecure-ira0@ix)3pip7)de1=!e1qfa#hizidv0@g2fffm7a&h=lahrbz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ["https://cartino.chbk.run","cartino.chbk.run"]
+ALLOWED_HOSTS = ["https://cartino.chbk.run","cartino.chbk.run"]
 #CSRF_TRUSTED_ORIGINS = ["https://cartino.chbk.run","cartino.chbk.run"]
 
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, LitnerKarNameDBModel, LitnerModel, \
-    LitnerAnswer, MyLitnerclass,UserQuestionAnswerCount,NotificationModel
+    LitnerAnswer, MyLitnerclass,UserQuestionAnswerCount
 from accounts.serializer import UserSerializers
 
 
@@ -12,23 +12,10 @@ class LitnerAwnsereserilizer(serializers.ModelSerializer):
 class UserQuestionAnswerCountSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserQuestionAnswerCount
-        fields = ['id', 'user', 'question', 'correct_answer_count','is_hide']  
+        fields = ['id', 'user', 'question', 'is_hide','is_correct']  
 
     def create(self, validated_data):
         return UserQuestionAnswerCount.objects.create(*validated_data)
-
-    def update(self, instance, validated_data):
-        instance.correct_answer_count = validated_data.get('correct_answer_count', instance.correct_answer_count)
-        instance.save()
-        return instance
-
-class LitnerNotificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = NotificationModel
-        fields = ('user','question','title','time')
-
-    def create(self, validated_data):
-        return NotificationModel.objects.create(*validated_data)
 
 
 class LitnerQuestionSerializer(serializers.ModelSerializer):
@@ -130,12 +117,12 @@ class LitnerDetailSerializer(serializers.ModelSerializer):
     is_paid = serializers.SerializerMethodField(read_only=True)
     author = serializers.SlugRelatedField(slug_field="full_name", read_only=True)
     is_author = serializers.SerializerMethodField(read_only=True)
-    correct_answer_count = UserQuestionAnswerCountSerializer(read_only=True, many=True)
+
 
     
     class Meta:
         model = LitnerModel
-        fields = ("id", "title", "description", "cover_image", "price", "data_created", "author", "myclass", "is_paid", "have_karname", "is_author", "question",'correct_answer_count')
+        fields = ("id", "title", "description", "cover_image", "price", "data_created", "author", "myclass", "is_paid", "have_karname", "is_author", "question",)
 
     def get_is_paid(self, obj):
       request = self.context.get("request")
@@ -242,8 +229,3 @@ class LitnerTakeExamSerializer(serializers.ModelSerializer):
             answered.is_correct = is_correct
             answered.save()
         return karname
-
-    
-
-
-
