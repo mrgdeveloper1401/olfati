@@ -126,50 +126,42 @@ class LitnerView(APIView):
 
 
 class LitnerTakingExam(APIView):
-  #  permission_classes = [IsAuthenticated]
-    def get(self, request, pk=None): 
-        if pk is None: 
-            try: 
-                litners = LitnerModel.objects.all() 
-                serializer = LitnerSerializer(litners, many=True) 
-                return Response({'data': serializer.data}, status.HTTP_200_OK) 
-            except Exception as ins: 
-                return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND) 
 
-        else: 
-            try: 
+    def get(self, request, pk=None):
+        if pk is None:
+            try:
+                litners = LitnerModel.objects.all()
+                serializer = LitnerSerializer(litners, many=True)
+                return Response({'data': serializer.data}, status.HTTP_200_OK)
+            except Exception as ins:
+                return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND)
+
+        else:
+            try:
                 litner = LitnerModel.objects.get(myclass_id=pk, paid_users=self.request.user)
-                
-                # Fetch questions for this litner
                 questions = LitnerQuestionModel.objects.filter(litner=litner)
-                
-                # Get the count of how many times the user answered each question correctly
-                user_question_answer_cheack = UserQuestionAnswerCount.objects.filter(user=request.user, question__in=questions,is_correctt=False)
-
-                if user_question_answer_cheack.exists():  
-                    # Get the question IDs of those the user answered less than 6 times correctly
-                    question_ids_with_correct_counts = user_question_answer_cheack.filter(user=request.user,is_correctt=False).values_list('question_id', flat=True)
+                user_question_answer_check = UserQuestionAnswerCount.objects.filter(user=request.user, question__in=questions)
+                all_correct = user_question_answer_check.filter(is_correctt=True).count() == questions.count()
+                if all_correct:
+                    questions_to_display = []
+                else:
+                    question_ids_with_correct_counts = user_question_answer_check.filter(is_correctt=False).values_list('question_id', flat=True)
                     
                     if question_ids_with_correct_counts.exists():
                         questions_to_display = questions.filter(id__in=question_ids_with_correct_counts)
                     else:
-                        questions_to_display = questions
-                else:
-                    # If no recorded answers are found, display all questions
-                    questions_to_display = questions
+                        questions_to_display = list(questions)
 
-                serializer = LitnerDetailSerializer(litner, context={'request': request, 'exam': pk, 'questions_to_display': questions_to_display}) 
+                serializer = LitnerDetailSerializer(litner, context={'request': request, 'exam': pk, 'questions_to_display': questions_to_display})
                 
-                return Response({'data': serializer.data}, status.HTTP_200_OK) 
+                return Response({'data': serializer.data}, status.HTTP_200_OK)
 
             except LitnerModel.DoesNotExist:
-                return Response({'message': 'litner not found'}, status.HTTP_404_NOT_FOUND) 
-            except Exception as ins: 
-                print(ins)
-                return Response({'message': 'An error occurred'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'message': 'Litner not found'}, status.HTTP_404_NOT_FOUND)
+            except Exception as ins:
+                print(f"Error in LitnerTakingExam: {str(ins)}")
+                return Response({'message': 'An error occurred: ' + str(ins)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-        
     def post(self, request, pk):
      exam = get_object_or_404(LitnerModel, pk=pk)
      try:
