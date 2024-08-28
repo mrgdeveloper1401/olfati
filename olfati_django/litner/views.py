@@ -193,13 +193,13 @@ class LitnerTakingExam(APIView):
             question = answer.question
             user_answer_check, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question,is_correctt=True)
             user_answer_check.is_correctt == True
-            send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(days=3))
+          #  send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(days=3))
             user_answer_check.save()
         
         for answer in is_false:
             question = answer.question
             user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
-            send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
+        #    send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
             user_answer_count.save()
 
         for answer in is_null:
@@ -276,7 +276,7 @@ class LitnerTakingExam(APIView):
             user_answer_count.is_correctt = True  
             user_answer_count.save()
             print("11111")
-            send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body', eta=timezone.now() + timedelta(hours=24))
+            #send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body', eta=timezone.now() + timedelta(hours=24))
 
             
 
@@ -285,7 +285,7 @@ class LitnerTakingExam(APIView):
            question = answer.question
            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
            user_answer_count.save()
-           send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
+          # send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
 
 
     # Update or validate the serializer
