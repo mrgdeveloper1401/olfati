@@ -294,11 +294,11 @@ class LitnerTakingExam(APIView):
        if serializer.is_valid():
           try:
             serializer.save()
-            return Response(serializer.data)  # Respond with the updated data.
           except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
        else:
-          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+          return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
+       return Response(serializer.data)
 
 
 
