@@ -298,7 +298,6 @@ class LitnerTakingExam(APIView):
 
 
 
-
 class ListProfileMyClassView(generics.ListAPIView):
     serializer_class = MyLitnerClassSerializer
     permission_classes = [IsAuthenticated]
