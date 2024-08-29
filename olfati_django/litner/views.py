@@ -12,7 +12,10 @@ from django.db.models import Q
 from django.utils import timezone
 from datetime import timedelta
 from .tasks import send_notification_task
+import logging
 
+
+logger = logging.getLogger(__name__)
 permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
 
 class ListCreateMyClassView(ModelViewSet):
@@ -163,6 +166,7 @@ class LitnerTakingExam(APIView):
                 return Response({'message': 'An error occurred: ' + str(ins)}, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def post(self, request, pk):
+     logger.info("POST request received for exam pk: %s", pk)  # Add this line
      exam = get_object_or_404(LitnerModel, pk=pk)
      try:
         karname = LitnerKarNameModel.objects.get(user=request.user, exam_id=exam)
@@ -236,7 +240,6 @@ class LitnerTakingExam(APIView):
         else:
             return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
         
-        
     def put(self, request, pk):
        data = {'user': request.user.id, "exam_id": pk}
        if request.data:
@@ -291,11 +294,6 @@ class LitnerTakingExam(APIView):
        else:
           return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
        return Response(serializer.data)
-
-
-
-
-
 
 
 
