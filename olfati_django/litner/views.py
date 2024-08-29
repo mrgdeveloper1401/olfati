@@ -189,18 +189,21 @@ class LitnerTakingExam(APIView):
             question = answer.question
             user_answer_check, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question,is_correctt=True)
             user_answer_check.is_correctt == True
+            logger.info("Answers check  is_correct: %d", user_answer_check)
           #  send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(days=3))
             user_answer_check.save()
         
         for answer in is_false:
             question = answer.question
             user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+            logger.info("Answers check is false: %d", user_answer_check)
         #    send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
             user_answer_count.save()
 
         for answer in is_null:
             question = answer.question
             user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+            logger.info("Answers check is null : %d", user_answer_check)
             user_answer_count.save()
 
             
@@ -242,16 +245,16 @@ class LitnerTakingExam(APIView):
         
     def put(self, request, pk):
        data = {'user': request.user.id, "exam_id": pk}
-       print(data)
+       
        if request.data:
           data['karname'] = request.data
        else:
          data['karname'] = []
 
        exam = get_object_or_404(LitnerModel, pk=pk)
-       print("Found exam:", exam)
+  
        karname = get_object_or_404(LitnerKarNameModel, user=request.user, exam_id=exam)
-       print("Found Karname:", karname)
+     
 
     # Get the user's previous answers
        answers = LitnerKarNameDBModel.objects.filter(karname=karname)
