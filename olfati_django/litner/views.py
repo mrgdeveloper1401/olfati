@@ -188,7 +188,6 @@ class LitnerTakingExam(APIView):
         for answer in is_corrects:
             question = answer.question
             user_answer_check, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question,is_correctt=True)
-            user_answer_check.is_correctt == True
             logger.info("Answers check  is_correct: %d", user_answer_check)
           #  send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(days=3))
             user_answer_check.save()
@@ -202,9 +201,9 @@ class LitnerTakingExam(APIView):
 
         for answer in is_null:
             question = answer.question
-            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+            user_answer_check, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
             logger.info("Answers check is null : %d", user_answer_check)
-            user_answer_count.save()
+            user_answer_check.save()
 
             
 
@@ -305,7 +304,6 @@ class LitnerTakingExam(APIView):
           return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
        print(serializer.errors)
        return Response(serializer.data)
-
 
 
 
