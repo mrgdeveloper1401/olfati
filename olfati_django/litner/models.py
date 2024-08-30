@@ -94,4 +94,5 @@ class LitnerKarNameDBModel(models.Model):
     question = models.ForeignKey(LitnerQuestionModel, on_delete=models.PROTECT, related_name='question_id')
     is_correct = models.BooleanField(null=True)
     karname = models.ForeignKey(LitnerKarNameModel, on_delete=models.PROTECT, related_name="karname")
+    answered_at = models.DateTimeField(auto_now_add=True,null=True)
 
