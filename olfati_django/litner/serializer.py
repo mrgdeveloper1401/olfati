@@ -196,6 +196,7 @@ class LitnerKarNameSerializer(serializers.ModelSerializer):
 
 
 
+
 class LitnerTakeExamSerializer(serializers.ModelSerializer):
     karname = LitnerKarnameDBSerializer(LitnerKarNameDBModel.objects.all(), many=True)
 

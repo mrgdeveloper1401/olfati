@@ -128,6 +128,8 @@ class LitnerView(APIView):
         pass
 
 
+
+
 class LitnerTakingExam(APIView):
 
     def get(self, request, pk=None):
@@ -247,6 +249,7 @@ class LitnerTakingExam(APIView):
        
        if request.data:
           data['karname'] = request.data
+          print(data)
        else:
          data['karname'] = []
 
@@ -257,7 +260,6 @@ class LitnerTakingExam(APIView):
 
     # Get the user's previous answers
        answers = LitnerKarNameDBModel.objects.filter(karname=karname)
-       logger.info("Filtered Answers Count: %d", answers.count())
        logger.info("Answers : %d", answers)
 
        is_corrects = []
@@ -285,25 +287,25 @@ class LitnerTakingExam(APIView):
        for answer in is_false:
            question = answer.question
            user_answer_count, created = UserQuestionAnswerCount.objects.get_or_create(user=request.user, question=question)
+           user_answer_count.is_correctt = False
            user_answer_count.save()
           # send_notification_task.delay(token='user_fcm_token', title='Test Title', body='Test Body' ,eta=timezone.now() + timedelta(hours=24))
 
 
     # Update or validate the serializer
        serializer = LitnerTakeExamSerializer(instance=karname, data=data, context={'request': request, 'exam': pk}, partial=True)
-       print(serializer)
-
        if serializer.is_valid():
           try:
             serializer.save()
           except Exception as e:
             print(e)
-            print(serializer.errors)
             return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
        else:
           return Response(serializer.errors, status.HTTP_404_NOT_FOUND)
-       print(serializer.errors)
        return Response(serializer.data)
+
+
+
 
 
 
