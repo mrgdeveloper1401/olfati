@@ -39,8 +39,9 @@ SECRET_KEY = 'django-insecure-ira0@ix)3pip7)de1=!e1qfa#hizidv0@g2fffm7a&h=lahrbz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ["https://cartino.chbk.run","cartino.chbk.run"]
-#CSRF_TRUSTED_ORIGINS = ["https://cartino.chbk.run","cartino.chbk.run"]
+# ALLOWED_HOSTS = ["https://cartino-app.ir", 'cartino-app.ir']
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ["https://cartino.chbk.app"]
 
 
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -138,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tehran'
 
 USE_I18N = True
 
@@ -196,8 +197,8 @@ LANGUAGE_CODE = 'fa'
 # مسیر به کلید خصوصی دانلود شده
 FIREBASE_ADMIN_KEY_PATH = os.path.join(BASE_DIR, 'firebase_admin_key.json')
 
-BROKER_URL = 'redis://:Fig3GFX9dLysKjUO@services.gen3.chabokan.net:46524/0'
-CELERY_RESULT_BACKEND = 'redis://:Fig3GFX9dLysKjUO@services.gen3.chabokan.net:46524/0'
+BROKER_URL = 'redis://:k8fO9PqtglIkXRkW@services.irn9.chabokan.net:48473/0'
+CELERY_RESULT_BACKEND = 'redis://:k8fO9PqtglIkXRkW@services.irn9.chabokan.net:48473/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
