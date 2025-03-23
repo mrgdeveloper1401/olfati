@@ -5,18 +5,21 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from .models import ExamModel, KarNameModel, KarNameDBModel, MyExamClass
-from .serializer import ExamDetailsSerializer, ExamSerializer, KarNameSerializer, TakeExamSerializer, MyExamClassSerializer
+from .serializer import ExamDetailsSerializer, ExamSerializer, KarNameSerializer, TakeExamSerializer, \
+    MyExamClassSerializer
+
 
 class ListCreateMyClassView(ModelViewSet):
-    permission_classes = [IsAuthenticated,]
+    permission_classes = [IsAuthenticated, ]
     serializer_class = MyExamClassSerializer
     queryset = MyExamClass.objects.all()
 
     def get_serializer_class(self):
         return MyExamClassSerializer
-            
+
     def get_serializer_context(self):
         return {'request': self.request}
+
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -26,14 +29,13 @@ class ListCreateMyClassView(ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response({"data":serializer.data})
-    
+        return Response({"data": serializer.data})
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data.get('exams', None)
-        return Response({"data":data})
-
+        return Response({"data": data})
 
 
 class ExamListView(APIView):
@@ -44,15 +46,15 @@ class ExamListView(APIView):
         if pk is None:
             try:
                 exams = ExamModel.objects.all()
-                serializer = ExamSerializer(exams, many=True, context = {'request': request})
+                serializer = ExamSerializer(exams, many=True, context={'request': request})
                 return Response({'data': serializer.data}, status.HTTP_200_OK)
             except Exception as ins:
                 return Response({'message': str(ins)}, status.HTTP_404_NOT_FOUND)
         else:
             try:
                 exams = ExamModel.objects.get(pk=pk)
-                serializer = ExamDetailsSerializer(exams, context = {'request': request})  
-                data = serializer.data.get("questions")   
+                serializer = ExamDetailsSerializer(exams, context={'request': request})
+                data = serializer.data.get("questions")
                 return Response({'data': data}, status.HTTP_200_OK)
             except Exception as ins:
                 return Response({'message': 'exam notFound'}, status.HTTP_404_NOT_FOUND)
@@ -151,7 +153,7 @@ class ExamView(APIView):
 
     def post(self, request):
         try:
-            serializer = ExamDetailsSerializer(data=request.data, context = {'request': request})
+            serializer = ExamDetailsSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(
@@ -163,7 +165,7 @@ class ExamView(APIView):
     def put(self, request, pk):
         query = ExamModel.objects.get(pk=pk)
         serializer = ExamDetailsSerializer(
-            instance=query, data=request.data, partial=True, context = {'request': request})
+            instance=query, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -184,5 +186,5 @@ class ExamKarNameView(APIView):
 
     def get(self, request):
         query = KarNameModel.objects.all()
-        srz_data = KarNameSerializer(query, many=True, context = {'request': request}).data
+        srz_data = KarNameSerializer(query, many=True, context={'request': request}).data
         return Response(srz_data, status.HTTP_200_OK)

@@ -331,7 +331,7 @@ class LitnerTakingExam(APIView):
 
         karname = get_object_or_404(LitnerKarNameModel, user=request.user, exam_id=exam)
         return Response(
-            {'karname': {'exam_id': karname.exam_id, 'user': karname.user, 'completed_at': karname.completed_at}},
+            {'karname': {'exam_id': str(karname.exam_id), 'user': str(karname.user), 'completed_at': str(karname.completed_at)}},
             status.HTTP_200_OK)
 
 

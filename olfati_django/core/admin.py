@@ -4,7 +4,8 @@ from django import forms
 
 from accounts.models import OtpModel, UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
-from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel,LitnerAnswer,UserQuestionAnswerCount
+from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel, \
+    LitnerAnswer, UserQuestionAnswerCount
 from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
     Myclass
 
@@ -12,16 +13,17 @@ from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKa
 @admin.register(UserModel)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('full_name', 'study_field', 'username', 'phone_number', 'melli_code', 'is_staff', 'date_joined')
-    search_fields = ('full_name','username', 'phone_number', 'melli_code', 'study_field')
+    search_fields = ('full_name', 'username', 'phone_number', 'melli_code', 'study_field')
     list_filter = ('is_active', 'study_field')
+    list_display_links = ('username',)
 
     fieldsets = (
-        ('اطلاعات شخصی', {'fields': ('full_name','study_field','username','melli_code','phone_number')}),
+        ('اطلاعات شخصی', {'fields': ('full_name', 'study_field', 'username', 'melli_code', 'phone_number')}),
         #('دسترسی‌ها', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('گزارش تاریخ', {'fields': ('last_login', 'date_joined')}),
     )
 
-    
+
 @admin.register(LitnerModel)
 class UserAdmin(admin.ModelAdmin):
     pass
@@ -31,9 +33,11 @@ class UserAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(LitnerQuestionModel)
 class UserAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(UserQuestionAnswerCount)
 class UserQuestionAnswerCountAdmin(admin.ModelAdmin):
@@ -83,8 +87,8 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(OtpModel)
 class UserAdmin(admin.ModelAdmin):
     list_display = ("phone_number", "otpCode",)
-    search_fields = ("phone_number", "otpCode",)
-    list_filter = ("phone_number", "otpCode",)
+    search_fields = ("phone_number",)
+    list_filter = ("phone_number",)
 
 
 @admin.register(LogEntry)
@@ -117,6 +121,7 @@ class MyLitnerclassAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filter the queryset for the 'author' field to show only staff users
         self.fields['author'].queryset = UserModel.objects.filter(is_staff=True)
+
 
 # class UserAdmin(admin.ModelAdmin):
 @admin.register(MyLitnerclass)

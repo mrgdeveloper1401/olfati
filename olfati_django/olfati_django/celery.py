@@ -9,6 +9,7 @@ app.conf.broker_url = 'redis://:k8fO9PqtglIkXRkW@services.irn9.chabokan.net:4847
 
 app.autodiscover_tasks()
 
+
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')

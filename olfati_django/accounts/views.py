@@ -59,12 +59,12 @@ class SendCode(APIView):
             code = Helper.generate_otp_code()
             api_key = '366A34417873646451665051752B6B4A4F784B77484E50344B68374434346E53684F387558346D717349773D'
             params = {
-                    'receptor': phone_number,
-                    'template': 'verify',
-                    'token': code,
-                    'type': 'sms',  # sms vs call
-                }
-            api = KavenegarAPI(api_key)  
+                'receptor': phone_number,
+                'template': 'verify',
+                'token': code,
+                'type': 'sms',  # sms vs call
+            }
+            api = KavenegarAPI(api_key)
             api.verify_lookup(params)
             OtpModel.objects.create(phone_number=phone_number, otpCode=code)
             return Response({'message': 'Code Sent!'}, status.HTTP_200_OK)
@@ -99,12 +99,13 @@ class VerifyOTPView(APIView):
                 return Response({'message': 'OTP code not valid'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response({'message': serializer.errors}, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 class AdminLoginView(APIView):
-  #  permission_classes = [AllowAny]
+    #  permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get('username')
-       # password = request.data.get('password')
+        # password = request.data.get('password')
         user = authenticate(username=username)
         if user is not None and user.is_superuser:
             refresh = RefreshToken.for_user(user)
@@ -114,6 +115,7 @@ class AdminLoginView(APIView):
             })
         else:
             return Response({'error': 'Invalid Credentials or Not Superuser'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class ResetPasswordView(APIView):
     def post(self, request):
@@ -131,12 +133,13 @@ class ResetPasswordView(APIView):
             return Response({'message': 'Password reset successfully. User now has access to admin panel.'})
         except UserModel.DoesNotExist:
             return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
-        
+
+
 class EditProfileView(APIView):
- def post(self, request):
-       # if not request.user.is_superuser:
+    def post(self, request):
+        # if not request.user.is_superuser:
         #    return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
-        
+
         username = request.data.get('username')
         new_username = request.data.get('new_username', None)
         first_name = request.data.get('first_name', None)

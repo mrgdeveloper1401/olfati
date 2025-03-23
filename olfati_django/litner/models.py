@@ -36,7 +36,7 @@ class LitnerModel(models.Model):
     myclass = models.ForeignKey(MyLitnerclass, related_name='litners', on_delete=models.CASCADE,
                                 verbose_name='کلاس مربوطه')
     data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
-    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True, null=True,
+    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,
                                         verbose_name='دسترسی کاربران')
 
     @property
