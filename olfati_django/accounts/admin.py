@@ -37,3 +37,9 @@ class UserModelAdmin(BaseUserAdmin):
     search_fields = ("phone_number",)
     ordering = ("-date_joined",)
     list_per_page = 20
+
+
+@admin.register(models.OtpModel)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ("phone_number", "otp_code", "created_at", "expired_date")
+    search_fields = ("phone_number",)

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 from django import forms
 
-from accounts.models import OtpModel, UserModel
+from accounts.models import UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
 from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
     Myclass
@@ -55,13 +55,6 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(QuestionModel)
 class UserAdmin(admin.ModelAdmin):
     pass
-
-
-@admin.register(OtpModel)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ("phone_number", "otpCode",)
-    search_fields = ("phone_number",)
-    list_filter = ("phone_number",)
 
 
 @admin.register(LogEntry)

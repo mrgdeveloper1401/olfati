@@ -1,11 +1,11 @@
 import codecs
-from random import randint
+
 from django.contrib.auth.models import Group
-from kavenegar import KavenegarAPI
-from rest_framework import status, generics, response, permissions, views
+from rest_framework import status, response, views
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 
+from utils.sed_code import send_sms_verify
 from .models import OtpModel, UserModel
 from .permissions import NotAuthenticated
 from . import serializer
@@ -29,38 +29,21 @@ class UserRegistrationView(views.APIView):
         return response.Response(data, status=status.HTTP_201_CREATED)
 
 
-class Helper:
-    @staticmethod
-    def generate_otp_code():
-        return str(randint(1000, 9999))
-
-
 class SendCode(views.APIView):
     serializer_class = serializer.RequestOtpSerializer
     permission_classes = (NotAuthenticated,)
 
     def post(self, request):
-        phone_number = request.data.get("phone_number")
-        if not phone_number:
-            return response.Response({'status': status.HTTP_400_BAD_REQUEST, 'message': 'Invalid phone number.'})
+        ser = self.serializer_class(data=request.data)
+        ser.is_valid(raise_exception=True)
+        phone_number = ser.validated_data['phone_number']
+
         try:
-            code = Helper.generate_otp_code()
-            api_key = '366A34417873646451665051752B6B4A4F784B77484E50344B68374434346E53684F387558346D717349773D'
-            params = {
-                'receptor': phone_number,
-                'template': 'verify',
-                'token': code,
-                'type': 'sms',  # sms vs call
-            }
-            api = KavenegarAPI(api_key)
-            api.verify_lookup(params)
-            OtpModel.objects.create(phone_number=phone_number, otpCode=code)
-            return response.Response({'message': 'Code Sent!'}, status.HTTP_200_OK)
+            otp = OtpModel.objects.create(phone_number=phone_number)
+            send_sms_verify(otp.phone_number, otp.otp_code)
+            return response.Response({'message': 'Code Sent!'}, status.HTTP_201_CREATED)
         except Exception as e:
-            error_message = str(e)
-            decoded_error_message = codecs.decode(
-                error_message, 'unicode-escape').encode('latin-1').decode('utf-8')
-            return response.Response({'message': error_message}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise e
 
 
 class VerifyOTPView(views.APIView):
@@ -68,27 +51,39 @@ class VerifyOTPView(views.APIView):
     permission_classes = (NotAuthenticated,)
 
     def post(self, request):
-        ser = serializer.OtpSerializers(data=request.data)
-        if ser.is_valid():
-            phone_number = ser.validated_data['phone_number']
-            code = ser.validated_data['otpCode']
-            try:
-                otp_code = OtpModel.objects.get(
-                    phone_number=phone_number, otpCode=code)
-                try:
-                    user = UserModel.objects.get(
-                        phone_number=phone_number, is_active=True)
-                    userSRZ = serializer.UserSerializers(instance=user).data
-                    refresh = RefreshToken.for_user(user)
-                    token = {'refresh': str(refresh), 'access': str(
-                        refresh.access_token)}
-                    otp_code.delete()
-                    return response.Response({'is_active': True, 'user': userSRZ, 'token': token}, status.HTTP_200_OK)
-                except UserModel.DoesNotExist:
-                    return response.Response({'is_active': False}, status.HTTP_200_OK)
-            except OtpModel.DoesNotExist:
-                return response.Response({'message': 'OTP code not valid'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return response.Response({'message': serializer.errors}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        ser = self.serializer_class(data=request.data)
+        ser.is_valid(raise_exception=True)
+        phone_number = ser.validated_data['phone_number']
+        code = ser.validated_data['otp_code']
+
+        otp_code = OtpModel.objects.filter(
+            phone_number=phone_number,
+            otp_code=code
+        ).only("phone_number", "otp_code").last()
+
+        if not otp_code:
+            return response.Response({'message': 'OTP not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        elif otp_code and otp_code.is_expired_otp_code is True:
+            otp_code.delete()
+            return response.Response({"message": "otp code is expired"}, status=status.HTTP_403_FORBIDDEN)
+
+        else:
+            user = UserModel.objects.filter(phone_number=phone_number).only("phone_number").last()
+
+            if not user:
+                return response.Response({'message': 'you must create account'}, status.HTTP_404_NOT_FOUND)
+
+            if user and user.is_active is False:
+                return response.Response({'message': 'your account is benned'}, status.HTTP_403_FORBIDDEN)
+
+            else:
+                token = RefreshToken.for_user(user)
+                return response.Response(
+                    data={
+                        "access_token": str(token.access_token),
+                    }
+                )
 
 
 class AdminLoginView(views.APIView):
