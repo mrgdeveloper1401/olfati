@@ -1,14 +1,14 @@
 from django.urls import path
 
-from accounts.views import EditProfileView, ResetPasswordView, SendCode, VerifyOTPView, UserView,AdminLoginView
+from . import views
 
 urlpatterns = [
-    path("login", SendCode.as_view()),
-    path("verify-otp", VerifyOTPView.as_view()),
-    path("create-user", UserView.as_view()),
+    path("login", views.SendCode.as_view()),
+    path("verify-otp", views.VerifyOTPView.as_view()),
+    path("create-user", views.UserRegistrationView.as_view(), name="create-user"),
     # Admin:
-    path("admin-login", AdminLoginView.as_view()),
-    path("admin-reset", ResetPasswordView.as_view()),
-    path("admin-edite", EditProfileView.as_view()),
+    path("admin-login", views.AdminLoginView.as_view()),
+    path("admin-reset", views.ResetPasswordView.as_view()),
+    path("admin-edite", views.EditProfileView.as_view()),
 
 ]

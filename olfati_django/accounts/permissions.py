@@ -33,7 +33,6 @@ class IsAuthenticated(BasePermission):
         #return getattr(payment,'has_access',True)
 
 
-
-
-
-
+class NotAuthenticated(BasePermission):
+    def has_permission(self, request, view):
+        return not request.user.is_authenticated

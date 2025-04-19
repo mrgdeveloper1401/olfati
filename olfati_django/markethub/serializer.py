@@ -40,7 +40,7 @@ class MarketHubSerializer(serializers.ModelSerializer):
 
 class MarketHubDetailSerializer(serializers.ModelSerializer):
     questions = MarketHubQuestionSerializer(many=True, read_only=True)
-    author = serializers.SlugRelatedField(slug_field="full_name", read_only=True)
+    author = serializers.SlugRelatedField(slug_field="get_full_name", read_only=True)
     is_paid = serializers.SerializerMethodField(read_only=True)
     have_karname = serializers.SerializerMethodField(read_only=True)
     is_author = serializers.SerializerMethodField(read_only=True)

@@ -4,44 +4,22 @@ from django import forms
 
 from accounts.models import OtpModel, UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
-from litner.models import LitnerModel, LitnerQuestionModel, LitnerKarNameModel, MyLitnerclass, LitnerKarNameDBModel, \
-    LitnerAnswer, UserQuestionAnswerCount
 from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
     Myclass
 
 
-@admin.register(UserModel)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'study_field', 'username', 'phone_number', 'melli_code', 'is_staff', 'date_joined')
-    search_fields = ('full_name', 'username', 'phone_number', 'melli_code', 'study_field')
-    list_filter = ('is_active', 'study_field')
-    list_display_links = ('username',)
-
-    fieldsets = (
-        ('اطلاعات شخصی', {'fields': ('full_name', 'study_field', 'username', 'melli_code', 'phone_number')}),
-        #('دسترسی‌ها', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('گزارش تاریخ', {'fields': ('last_login', 'date_joined')}),
-    )
-
-
-@admin.register(LitnerModel)
-class UserAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(LitnerAnswer)
-class UserAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(LitnerQuestionModel)
-class UserAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(UserQuestionAnswerCount)
-class UserQuestionAnswerCountAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(UserModel)
+# class UserAdmin(admin.ModelAdmin):
+#     list_display = ('full_name', 'study_field', 'username', 'phone_number', 'melli_code', 'is_staff', 'date_joined')
+#     search_fields = ('full_name', 'username', 'phone_number', 'melli_code', 'study_field')
+#     list_filter = ('is_active', 'study_field')
+#     list_display_links = ('username',)
+#
+#     fieldsets = (
+#         ('اطلاعات شخصی', {'fields': ('full_name', 'study_field', 'username', 'melli_code', 'phone_number')}),
+#         #('دسترسی‌ها', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+#         ('گزارش تاریخ', {'fields': ('last_login', 'date_joined')}),
+#     )
 
 
 @admin.register(MarketHubModel)
@@ -50,11 +28,6 @@ class UserAdmin(admin.ModelAdmin):
 
 
 @admin.register(MarketHubQuestionModel)
-class UserAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(LitnerKarNameModel)
 class UserAdmin(admin.ModelAdmin):
     pass
 
@@ -112,23 +85,6 @@ class MarketHubKarNameDBModelAdmin(admin.ModelAdmin):
     pass
 
 
-class MyLitnerclassAdminForm(forms.ModelForm):
-    class Meta:
-        model = MyLitnerclass
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Filter the queryset for the 'author' field to show only staff users
-        self.fields['author'].queryset = UserModel.objects.filter(is_staff=True)
-
-
-# class UserAdmin(admin.ModelAdmin):
-@admin.register(MyLitnerclass)
-class MyLitnerclassAdmin(admin.ModelAdmin):
-    form = MyLitnerclassAdminForm
-
-
 class MyExamClassAdminForm(forms.ModelForm):
     class Meta:
         model = MyExamClass
@@ -147,9 +103,4 @@ class MyExamClassAdmin(admin.ModelAdmin):
 
 @admin.register(Myclass)
 class MyclassAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(LitnerKarNameDBModel)
-class LitnerKarNameDBModelAdmin(admin.ModelAdmin):
     pass

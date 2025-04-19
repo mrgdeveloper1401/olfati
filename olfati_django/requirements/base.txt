@@ -1,0 +1,12 @@
+django==5.2
+python-decouple
+djangorestframework
+djangorestframework-simplejwt
+celery
+drf-spectacular
+drf-nested-routers
+pillow
+python-decouple
+httpx
+kavenegar
+firebase_admin

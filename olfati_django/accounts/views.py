@@ -1,47 +1,32 @@
 import codecs
 from random import randint
-from sqlite3 import IntegrityError
 from django.contrib.auth.models import Group
-
 from kavenegar import KavenegarAPI
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import status, generics, response, permissions, views
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-from rest_framework.permissions import AllowAny
+
 from .models import OtpModel, UserModel
-from .serializer import OtpSerializers, UserSerializers
+from .permissions import NotAuthenticated
+from . import serializer
 
 
-class UserView(APIView):
-    # permission_classes = [IsAuthenticated]
-    def post(self, request):
-        serializer = UserSerializers(data=request.data)
-        if serializer.is_valid():
-            phone_number = serializer.validated_data['phone_number']
-            if UserModel.objects.filter(phone_number=phone_number).exists():
-                return Response({'error': 'Repetitious Number'}, status.HTTP_400_BAD_REQUEST)
-            else:
-                try:
-                    user_instance = serializer.save(is_active=True)
-                    refresh = RefreshToken.for_user(user_instance)
-                    token = {'refresh': str(refresh), 'access': str(
-                        refresh.access_token)}
-                    response_data = {
-                        'message': 'Compiled Profile Successfully',
-                        'user': serializer.data,
-                        'token': token
-                    }
-                    return Response(response_data, status.HTTP_201_CREATED)
-                except IntegrityError:
-                    return Response({'error': 'Unknown Error'}, status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+class UserRegistrationView(views.APIView):
+    serializer_class = serializer.UserRegistrationSerializer
+    permission_classes = (NotAuthenticated,)
 
-    def get(self, request):
-        userData = UserModel.objects.all()
-        srz = UserSerializers(instance=userData, many=True)
-        return Response(srz.data)
+    def post(self, request, *args, **kwargs):
+        ser = self.serializer_class(data=request.data)
+        ser.is_valid(raise_exception=True)
+        user = ser.save()
+        refresh = RefreshToken.for_user(user)
+        data = {
+            'user_id': user.id,
+            'phone_number': user.phone_number,
+            'access': str(refresh.access_token),
+            'message': 'User registered successfully'
+        }
+        return response.Response(data, status=status.HTTP_201_CREATED)
 
 
 class Helper:
@@ -50,11 +35,14 @@ class Helper:
         return str(randint(1000, 9999))
 
 
-class SendCode(APIView):
+class SendCode(views.APIView):
+    serializer_class = serializer.RequestOtpSerializer
+    permission_classes = (NotAuthenticated,)
+
     def post(self, request):
         phone_number = request.data.get("phone_number")
         if not phone_number:
-            return Response({'status': status.HTTP_400_BAD_REQUEST, 'message': 'Invalid phone number.'})
+            return response.Response({'status': status.HTTP_400_BAD_REQUEST, 'message': 'Invalid phone number.'})
         try:
             code = Helper.generate_otp_code()
             api_key = '366A34417873646451665051752B6B4A4F784B77484E50344B68374434346E53684F387558346D717349773D'
@@ -67,40 +55,43 @@ class SendCode(APIView):
             api = KavenegarAPI(api_key)
             api.verify_lookup(params)
             OtpModel.objects.create(phone_number=phone_number, otpCode=code)
-            return Response({'message': 'Code Sent!'}, status.HTTP_200_OK)
+            return response.Response({'message': 'Code Sent!'}, status.HTTP_200_OK)
         except Exception as e:
             error_message = str(e)
             decoded_error_message = codecs.decode(
                 error_message, 'unicode-escape').encode('latin-1').decode('utf-8')
-            return Response({'message': error_message}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return response.Response({'message': error_message}, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class VerifyOTPView(APIView):
+class VerifyOTPView(views.APIView):
+    serializer_class = serializer.VerifyOtpSerializer
+    permission_classes = (NotAuthenticated,)
+
     def post(self, request):
-        serializer = OtpSerializers(data=request.data)
-        if serializer.is_valid():
-            phone_number = serializer.validated_data['phone_number']
-            code = serializer.validated_data['otpCode']
+        ser = serializer.OtpSerializers(data=request.data)
+        if ser.is_valid():
+            phone_number = ser.validated_data['phone_number']
+            code = ser.validated_data['otpCode']
             try:
                 otp_code = OtpModel.objects.get(
                     phone_number=phone_number, otpCode=code)
                 try:
                     user = UserModel.objects.get(
                         phone_number=phone_number, is_active=True)
-                    userSRZ = UserSerializers(instance=user).data
+                    userSRZ = serializer.UserSerializers(instance=user).data
                     refresh = RefreshToken.for_user(user)
                     token = {'refresh': str(refresh), 'access': str(
                         refresh.access_token)}
                     otp_code.delete()
-                    return Response({'is_active': True, 'user': userSRZ, 'token': token}, status.HTTP_200_OK)
+                    return response.Response({'is_active': True, 'user': userSRZ, 'token': token}, status.HTTP_200_OK)
                 except UserModel.DoesNotExist:
-                    return Response({'is_active': False}, status.HTTP_200_OK)
+                    return response.Response({'is_active': False}, status.HTTP_200_OK)
             except OtpModel.DoesNotExist:
-                return Response({'message': 'OTP code not valid'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'message': serializer.errors}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return response.Response({'message': 'OTP code not valid'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return response.Response({'message': serializer.errors}, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class AdminLoginView(APIView):
+class AdminLoginView(views.APIView):
     #  permission_classes = [AllowAny]
 
     def post(self, request):
@@ -109,15 +100,15 @@ class AdminLoginView(APIView):
         user = authenticate(username=username)
         if user is not None and user.is_superuser:
             refresh = RefreshToken.for_user(user)
-            return Response({
+            return response.Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
             })
         else:
-            return Response({'error': 'Invalid Credentials or Not Superuser'}, status=status.HTTP_401_UNAUTHORIZED)
+            return response.Response({'error': 'Invalid Credentials or Not Superuser'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-class ResetPasswordView(APIView):
+class ResetPasswordView(views.APIView):
     def post(self, request):
         username = request.data.get('username')
         new_password = request.data.get('new_password')
@@ -130,12 +121,12 @@ class ResetPasswordView(APIView):
             staff_group = Group.objects.get(name='teacher')  # فرضاً که گروهی به نام staff وجود دارد
             user.groups.add(staff_group)
 
-            return Response({'message': 'Password reset successfully. User now has access to admin panel.'})
+            return response.Response({'message': 'Password reset successfully. User now has access to admin panel.'})
         except UserModel.DoesNotExist:
-            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return response.Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class EditProfileView(APIView):
+class EditProfileView(views.APIView):
     def post(self, request):
         # if not request.user.is_superuser:
         #    return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
@@ -163,7 +154,7 @@ class EditProfileView(APIView):
                 user.phone_number = phone_number
             user.save()
             # سریالایز و برگرداندن داده‌های کاربر
-            user_data = UserSerializers(user).data
-            return Response({'message': 'Profile updated successfully', 'data': user_data})
+            user_data = serializer.UserSerializers(user).data
+            return response.Response({'message': 'Profile updated successfully', 'data': user_data})
         except UserModel.DoesNotExist:
-            return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return response.Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)

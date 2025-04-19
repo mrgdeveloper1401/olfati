@@ -12,33 +12,14 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# DATABASES = {
-#    'default': {
-#        'ENGINE': os.getenv("DB_ENGINE"),
-#        'NAME': os.getenv("DB_DATABASE"),
-#        'USER': os.getenv("DB_USERNAME"),
-#        'PASSWORD': os.getenv("DB_PASSWORD"),
-#        'HOST': os.getenv("DB_HOST"),
-#        'PORT':  os.getenv("DB_PORT"),
-#     }
-# }
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ira0@ix)3pip7)de1=!e1qfa#hizidv0@g2fffm7a&h=lahrbz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-# ALLOWED_HOSTS = ["https://cartino-app.ir", 'cartino-app.ir']
-ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ["https://cartino.chbk.app"]
+DEBUG = config("DEBUG", default=True, cast=bool)
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
@@ -63,8 +44,9 @@ INSTALLED_APPS = [
     "core",
     "litner",
     "markethub",
-    "django_celery_results",
-    'django_celery_beat',
+    # "django_celery_results",
+    # 'django_celery_beat',
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -75,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
 
 ROOT_URLCONF = 'olfati_django.urls'
@@ -100,15 +81,6 @@ WSGI_APPLICATION = 'olfati_django.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.UserModel'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -129,7 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -140,11 +112,11 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -152,19 +124,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('JWT',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
 }
 # تنظیمات JWT
 JWT_AUTH = {
-    'JWT_SECRET_KEY': SECRET_KEY,  # کلید مخفی برای امضای توکن
     'JWT_GET_USER_SECRET_KEY': None,  # تابع برای دریافت کلید مخفی کاربر (با توجه به شناسه کاربری)
     'JWT_PAYLOAD_HANDLER': 'path.to.custom_payload_handler',  # تابع برای ایجاد بسته داده‌های توکن
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'path.to.custom_response_payload_handler',
