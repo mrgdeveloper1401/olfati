@@ -27,10 +27,29 @@ class OtpSerializers(serializers.ModelSerializer):
 class RequestOtpSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
 
-    def validate(self, attrs):
-        otp = OtpModel.objects.filter(phone_number=attrs['phone_number']).only("phone_number").last()
+    # def validate(self, attrs):
+    #     phone=attrs.get('phone_number')
+    #     user = UserModel.objects.filter(phone_number=phone).only("phone_number").first()
+    #
+    #     if not user:
+    #         raise exceptions.NotFound()
+    #
+    #     otp = OtpModel.objects.filter(phone_number=phone).only("phone_number").last()
+    #
+    #     if otp and otp.is_expired_otp_code is False:
+    #         raise exceptions.ValidationError({"message": "you have already otp code please wait 2 minute"})
+    #
+    #     return attrs
 
-        if otp.is_expired_otp_code is False:
+    def validate(self, attrs):
+        phone=attrs.get('phone_number')
+
+        if not UserModel.objects.filter(phone_number=phone).exists():
+            raise exceptions.NotFound()
+
+        otp = OtpModel.objects.filter(phone_number=phone).only("phone_number").last()
+
+        if otp and otp.is_expired_otp_code is False:
             raise exceptions.ValidationError({"message": "you have already otp code please wait 2 minute"})
 
         return attrs
@@ -73,7 +92,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = [
+        fields = (
             'id',
             'first_name',
             "last_name",
@@ -83,6 +102,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'phone_number',
             'email',
             'date_joined',
-            'last_login',
-        ]
-        read_only_fields = ['id', 'date_joined', 'last_login']
+        )
+        read_only_fields = ("date_joined",)
