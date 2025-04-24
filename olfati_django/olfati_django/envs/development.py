@@ -27,3 +27,12 @@ INTERNAL_IPS = [
 SIMPLE_JWT['SIGNING_KEY'] = SECRET_KEY
 
 JWT_AUTH["JWT_SECRET_KEY"] = SECRET_KEY
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+}

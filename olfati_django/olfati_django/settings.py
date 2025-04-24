@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "core",
     "litner",
     "markethub",
+    "catalog_app",
     # "django_celery_results",
     # 'django_celery_beat',
     "drf_spectacular",
@@ -188,3 +189,4 @@ AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY", cast=str)
 AWS_STORAGE_BUCKET_NAME=config("AWS_STORAGE_BUCKET_NAME", cast=str)
 AWS_S3_ENDPOINT_URL=config("AWS_S3_ENDPOINT_URL", cast=str)
 AWS_S3_FILE_OVERWRITE=False
+AWS_S3_REGION_NAME = 'us-east-1'
