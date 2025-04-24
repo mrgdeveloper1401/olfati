@@ -5,8 +5,7 @@ WORKDIR /app
 COPY . .
 
 RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache py3-pip libpq
+    apk upgrade
 
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements/production.txt

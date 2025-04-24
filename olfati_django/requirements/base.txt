@@ -10,5 +10,5 @@ python-decouple
 httpx
 kavenegar
 firebase_admin
-boto3
+boto3==1.35.99
 django-storages
