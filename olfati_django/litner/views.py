@@ -43,11 +43,11 @@ class LinterSeasonViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['class_list_pk'] = self.kwargs["class_list_pk"]
+        context['class_list_pk'] = self.kwargs["class_pk"]
         return context
 
     def get_queryset(self):
-        return LitnerModel.objects.filter(myclass_id=self.kwargs["class_list_pk"])
+        return LitnerModel.objects.filter(myclass_id=self.kwargs["class_pk"])
 
     # def retrieve(self, request, *args, **kwargs):
     #     instance = self.get_object()

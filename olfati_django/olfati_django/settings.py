@@ -13,6 +13,7 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from decouple import config
+from django.conf.global_settings import STORAGES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     # "django_celery_results",
     # 'django_celery_beat',
     "drf_spectacular",
+    "storages"
 ]
 
 MIDDLEWARE = [
@@ -179,3 +181,10 @@ CELERY_TIMEZONE = 'Asia/Tehran'
 #         },
 #     }
 # }
+
+
+AWS_ACCESS_KEY_ID=config("AWS_ACCESS_KEY_ID", cast=str)
+AWS_SECRET_ACCESS_KEY=config("AWS_SECRET_ACCESS_KEY", cast=str)
+AWS_STORAGE_BUCKET_NAME=config("AWS_STORAGE_BUCKET_NAME", cast=str)
+AWS_S3_ENDPOINT_URL=config("AWS_S3_ENDPOINT_URL", cast=str)
+AWS_S3_FILE_OVERWRITE=False
