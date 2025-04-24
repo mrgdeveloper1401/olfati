@@ -51,3 +51,30 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SIMPLE_JWT['SIGNING_KEY'] = SECRET_KEY
 
 JWT_AUTH["JWT_SECRET_KEY"] = SECRET_KEY
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "file_log_prod.log"
+        }
+    },
+
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": False,
+        }
+    }
+}
