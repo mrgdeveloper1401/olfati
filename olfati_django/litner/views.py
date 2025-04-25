@@ -1,53 +1,63 @@
-from rest_framework import status, permissions, viewsets
+from rest_framework import status, permissions, viewsets, mixins, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
-from litner.models import LitnerModel, MyLitnerclass, LinterFlashCart, UserAnswer, LeitnerBox
-from litner.serializer import LitnerSerializer, MyLitnerClassSerializer, UserLinterBoxSerializer, \
-    AdminLinterBoxSerializer, LinterFlashCartSerializer, LinterUserAnswerSerializer
-from rest_framework import generics
+
+from . import serializer, models
 
 import logging
 
 from utils.vlaidations import CommonPagination
+from .permissions import IsOwnerOrReadOnly
 
 logger = logging.getLogger(__name__)
 permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
 
 
-class LinterClassViewSet(ModelViewSet):
-    serializer_class = MyLitnerClassSerializer
-    queryset = MyLitnerclass.objects.all()
+class LinterClassViewSet(viewsets.ModelViewSet):
+    serializer_class = serializer.MyLinterClassSerializer
+    queryset = models.MyLinterClass.objects.select_related(
+        "author"
+    ).only(
+        "author__first_name", "author__last_name", "title", "study_field", "cover_image__title", "created_at",
+        "updated_at", "cover_image__image_url"
+    ).select_related("cover_image")
     pagination_class = CommonPagination
+    permission_classes = (IsOwnerOrReadOnly,)
 
-    def get_permissions(self):
-        if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
-            self.permission_classes = (permissions.IsAdminUser,)
-        else:
-            self.permission_classes = (permissions.IsAuthenticated,)
-        return super().get_permissions()
+    # def get_permissions(self):
+    #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
+    #         self.permission_classes = (permissions.IsAdminUser,)
+    #     else:
+    #         self.permission_classes = (permissions.IsAuthenticated,)
+    #     return super().get_permissions()
+    #
+    # def get_queryset(self):
+    #     query = MyLitnerclass.objects.all()
+    #
+    #     if self.request.user.is_staff is False:
+    #         query = query.filter(is_publish=True)
+    #
+    #     return query
 
-    def get_queryset(self):
-        query = MyLitnerclass.objects.all()
 
-        if self.request.user.is_staff is False:
-            query = query.filter(is_publish=True)
-
-        return query
-
-
-class LinterSeasonViewSet(ModelViewSet):
-    queryset = LitnerModel.objects.all()
+class LinterSeasonViewSet(viewsets.ModelViewSet):
     pagination_class = CommonPagination
-    serializer_class = LitnerSerializer
+    serializer_class = serializer.LinterSerializer
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context['class_list_pk'] = self.kwargs["class_pk"]
+        context['linter_class_pk'] = self.kwargs["class_pk"]
         return context
 
     def get_queryset(self):
-        return LitnerModel.objects.filter(myclass_id=self.kwargs["class_pk"])
+        return models.LinterModel.objects.filter(
+            myclass_id=self.kwargs['class_pk'],
+            # paid_users=self.request.user
+        ).only(
+        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
+            "cover_image__image_url", "created_at", "updated_at",
+    ).select_related("myclass__author")
 
     # def retrieve(self, request, *args, **kwargs):
     #     instance = self.get_object()
@@ -80,14 +90,14 @@ class LitnerView(APIView):
     permission_classes = [permissions.IsAdminUser]
 
     def post(self, request):
-        data = LitnerSerializer(data=request.data, context={'request': request})
+        data = serializer.LinterSerializer(data=request.data, context={'request': request})
         data.is_valid(raise_exception=True)
         data.save()
         return Response(data.data)
 
     def delete(self, request, pk):
         try:
-            instance = LitnerModel.objects.get(pk=pk)
+            instance = models.LinterModel.objects.get(pk=pk)
             instance.delete()
             return Response({"massage": "litner remove successfully"}, status.HTTP_204_NO_CONTENT)
         except Exception:
@@ -322,63 +332,70 @@ class LitnerView(APIView):
 #         return Response({"data": serializer.data})
 
 
-class LinterBoxViewSet(viewsets.ModelViewSet):
+class LinterBoxViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
-        query = LeitnerBox.objects.filter(
+        return models.LeitnerBox.objects.filter(
             linter_id=self.kwargs['season_pk'],
-            linter__myclass_id=self.kwargs['class_pk']
+            linter__myclass_id=self.kwargs['class_pk'],
+            linter__paid_users=self.request.user
+        ).only("box_number")
+    serializer_class = serializer.UserLinterBoxSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+        # if self.request.user.is_staff is False:
+        #     query = query.filter(is_active=True).only("box_number")
+        #
+        # return query
+
+    # def get_permissions(self):
+    #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
+    #         self.permission_classes = (permissions.IsAdminUser,)
+    #     else:
+    #         self.permission_classes = (permissions.IsAuthenticated,)
+    #     return super().get_permissions()
+
+    # def get_serializer_class(self):
+    #     if self.request.user.is_staff is False:
+    #         return serializer.UserLinterBoxSerializer
+    #     else:
+    #         return serializer.AdminLinterBoxSerializer
+
+    # def get_serializer_context(self):
+    #     context = super().get_serializer_context()
+    #     context['linter_season_pk'] = self.kwargs['season_pk']
+    #     return context
+
+
+class LinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    serializer_class = serializer.LinterFlashCartSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    # def get_permissions(self):
+    #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
+    #         self.permission_classes = (permissions.IsAdminUser,)
+    #     else:
+    #         self.permission_classes = (permissions.IsAuthenticated,)
+    #     return super().get_permissions()
+
+    def get_queryset(self):
+        return models.LinterFlashCart.objects.filter(
+            box_id=self.kwargs['box_pk'], box__linter_id=self.kwargs['season_pk'],
+            box__linter__myclass_id=self.kwargs['class_pk'],
+            box__linter__paid_users=self.request.user
+        ).select_related("box").only(
+            "question_text", "answers_text", "box__box_number"
         )
 
-        if self.request.user.is_staff is False:
-            query = query.filter(is_active=True).only("box_number")
-
-        return query
-
-    def get_permissions(self):
-        if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
-            self.permission_classes = (permissions.IsAdminUser,)
-        else:
-            self.permission_classes = (permissions.IsAuthenticated,)
-        return super().get_permissions()
-
-    def get_serializer_class(self):
-        if self.request.user.is_staff is False:
-            return UserLinterBoxSerializer
-        else:
-            return AdminLinterBoxSerializer
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['linter_season_pk'] = self.kwargs['season_pk']
-        return context
-
-
-class LinterFlashCartViewSet(viewsets.ModelViewSet):
-    serializer_class = LinterFlashCartSerializer
-
-    def get_permissions(self):
-        if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
-            self.permission_classes = (permissions.IsAdminUser,)
-        else:
-            self.permission_classes = (permissions.IsAuthenticated,)
-        return super().get_permissions()
-
-    def get_queryset(self):
-        return LinterFlashCart.objects.filter(
-            box_id=self.kwargs['box_pk'], box__linter_id=self.kwargs['season_pk'],
-            box__linter__myclass_id=self.kwargs['class_pk']
-        ).select_related("box")
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['linter_box_pk'] = self.kwargs['box_pk']
-        return context
+    # def get_serializer_context(self):
+    #     context = super().get_serializer_context()
+    #     context['linter_box_pk'] = self.kwargs['box_pk']
+    #     return context
 
 
 class LinterUserAnswerView(generics.CreateAPIView):
     """
     status --> (correct, wrong, skipped)
     """
-    serializer_class = LinterUserAnswerSerializer
+    serializer_class = serializer.LinterUserAnswerSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = UserAnswer.objects.all()
+    queryset = models.UserAnswer.objects.all()

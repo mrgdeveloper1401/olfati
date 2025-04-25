@@ -1,6 +1,7 @@
-from drf_spectacular.utils import extend_schema_field
-from rest_framework import serializers, generics
-from litner.models import LitnerModel, LeitnerBox, LinterFlashCart, UserAnswer, MyLitnerclass
+from rest_framework import serializers, generics, exceptions
+
+from catalog_app.models import Image
+from . import models
 # from accounts.serializer import UserSerializers
 
 
@@ -49,61 +50,91 @@ from litner.models import LitnerModel, LeitnerBox, LinterFlashCart, UserAnswer, 
         #    return LitnerQuestionSerializer(obj.question.filter(hide_question=False),many=True).data
 
 
-class LitnerSerializer(serializers.ModelSerializer):
-    author = serializers.StringRelatedField()
-    myclass = serializers.SlugRelatedField(slug_field="id", read_only=True)
+class LinterSerializer(serializers.ModelSerializer):
     # have_karname = serializers.SerializerMethodField(read_only=True)
-    is_paid = serializers.SerializerMethodField(read_only=True)
-    is_author = serializers.SerializerMethodField(read_only=True)
+    is_author_season_class = serializers.SerializerMethodField()
+    cover_image = serializers.PrimaryKeyRelatedField(
+        queryset=Image.objects.only("title"),
+    )
 
     class Meta:
-        model = LitnerModel
-        fields = ('id', 'title', 'description', 'cover_image', 'price', 'data_created', 'author', 'is_paid',
-                  'is_author', "myclass")
+        model = models.LinterModel
+        exclude = ("is_deleted", "deleted_at", "paid_users", "myclass")
 
-    @extend_schema_field(serializers.BooleanField)
-    def get_is_paid(self, obj):
-        request = self.context.get("request")
-        return obj.is_paid_user(request.user)
-
-    # def get_have_karname(self, obj):
-    #     request = self.context.get("request")
-    #     return LitnerKarNameModel.objects.filter(user=request.user, exam_id=obj).exists()
-
-    @extend_schema_field(serializers.BooleanField)
-    def get_is_author(self, obj):
-        request = self.context.get("request")
-        return obj.is_author(request.user)
+    def get_is_author_season_class(self, obj):
+        return obj.myclass.author_id == self.context['request'].user.id
 
     def create(self, validated_data):
-        myclass_id = self.context['class_list_pk']
-        return LitnerModel.objects.create(myclass_id=myclass_id, **validated_data)
+        linter_class = self.context['linter_class_pk']
+        return models.LinterModel.objects.create(myclass_id=linter_class, **validated_data)
 
-
-class MyLitnerClassSerializer(serializers.ModelSerializer):
-    litners = LitnerSerializer(many=True, read_only=True)
-    paid_users_count = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = MyLitnerclass
-        fields = '__all__'
-        read_only_fields = ['author']
-
-    def get_paid_users_count(self, obj):
-        return LitnerModel.objects.filter(myclass=obj).values('paid_users').distinct().count()
-
-    def to_representation(self, instance):
-        request = self.context.get("request")
-        rep = super().to_representation(instance)
-        if not request.parser_context.get("kwargs").get("pk"):
-            rep.pop("litners", None)
-        return rep
-
-    def create(self, validated_data):
-        # Associate the authenticated user with the created object
+    def validate(self, attrs):
         user = self.context['request'].user
-        validated_data['author'] = user
-        return super().create(validated_data)
+        linter_class = self.context['linter_class_pk']
+        linter_class = models.MyLinterClass.objects.filter(author=user, id=linter_class).only(
+            "id",
+            "author__phone_number",
+        )
+
+        if not linter_class:
+            raise exceptions.PermissionDenied()
+        else:
+            get_image = attrs.get('cover_image')
+
+            if get_image:
+                user_image = Image.objects.filter(user=self.context['request'].user).only("title")
+                if not user_image:
+                    raise exceptions.ValidationError({"cover_image": "image not found"})
+        return attrs
+
+
+class MyLinterClassSerializer(serializers.ModelSerializer):
+    litners = LinterSerializer(many=True, read_only=True)
+    author_full_name = serializers.SerializerMethodField()
+    cover_image = serializers.PrimaryKeyRelatedField(
+        queryset=Image.objects.only('title')
+    )
+    cover_image_url = serializers.SerializerMethodField()
+    is_author_create_class = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.MyLinterClass
+        exclude = ("is_deleted", "deleted_at", "created_by")
+        read_only_fields = ("author",)
+
+    def get_author_full_name(self, obj):
+        return obj.author.get_full_name()
+
+    def get_cover_image_url(self, obj):
+        return obj.cover_image.image_url
+
+    def get_is_author_create_class(self, obj):
+        return obj.author == self.context['request'].user
+
+    # def to_representation(self, instance):
+    #     request = self.context.get("request")
+    #     rep = super().to_representation(instance)
+    #     if not request.parser_context.get("kwargs").get("pk"):
+    #         rep.pop("litners", None)
+    #     return rep
+
+    def validate(self, attrs):
+        get_image = attrs.get('cover_image')
+
+        if get_image:
+            user_image = Image.objects.filter(user=self.context['request'].user).only("title")
+
+            if not user_image:
+                raise exceptions.ValidationError({"cover_image": "image not found"})
+
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        return models.MyLinterClass.objects.create(
+            author=user,
+            **validated_data
+        )
 
 
 # class UserQuestionAnswerCountSerializer(serializers.ModelSerializer):
@@ -236,47 +267,47 @@ class MyLitnerClassSerializer(serializers.ModelSerializer):
 
 class AdminLinterBoxSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LeitnerBox
+        model = models.LeitnerBox
         fields = '__all__'
         read_only_fields = ("linter",)
 
     def create(self, validated_data):
         linter_season_pk = self.context['linter_season_pk']
-        return LeitnerBox.objects.create(linter_id=linter_season_pk, **validated_data)
+        return models.LeitnerBox.objects.create(linter_id=linter_season_pk, **validated_data)
 
     def validate(self, attrs):
         try:
-            generics.get_object_or_404(LitnerModel, id=self.context['linter_season_pk'])
-        except LitnerModel.DoesNotExist as e:
+            generics.get_object_or_404(models.LitnerModel, id=self.context['linter_season_pk'])
+        except models.LitnerModel.DoesNotExist as e:
             raise e
         return attrs
 
 
 class UserLinterBoxSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LeitnerBox
+        model = models.LeitnerBox
         fields = ("id", "box_number")
 
 
 class LinterFlashCartSerializer(serializers.ModelSerializer):
     class Meta:
-        model = LinterFlashCart
+        model = models.LinterFlashCart
         fields = ("id", "question_text", "answers_text", "box", "get_box_number")
         read_only_fields = ("box",)
 
     def create(self, validated_data):
         linter_box_pk = self.context['linter_box_pk']
-        return LinterFlashCart.objects.create(box_id=linter_box_pk, **validated_data)
+        return models.LinterFlashCart.objects.create(box_id=linter_box_pk, **validated_data)
 
     def validate(self, attrs):
         try:
-            generics.get_object_or_404(LeitnerBox, id=self.context['linter_box_pk'])
-        except LinterFlashCart.DoesNotExist as e:
+            generics.get_object_or_404(models.LeitnerBox, id=self.context['linter_box_pk'])
+        except models.LinterFlashCart.DoesNotExist as e:
             raise e
         return attrs
 
 
 class LinterUserAnswerSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserAnswer
+        model = models.UserAnswer
         fields = ("id", "box", "box_number", "answer_text", "status")

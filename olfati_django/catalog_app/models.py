@@ -2,7 +2,8 @@ from django.db import models
 from django.utils.text import slugify
 import os
 
-from core.models import CreateMixin, UpdateMixin
+from core.models import CreateMixin, UpdateMixin, SoftDeleteMixin
+from utils.vlaidations import validate_image_size
 
 
 def image_upload_path(instance, filename):
@@ -11,7 +12,9 @@ def image_upload_path(instance, filename):
     return f"catalog/images/{slugify(instance.title)}/{slugify(base_filename)}{file_extension}"
 
 
-class Image(CreateMixin, UpdateMixin):
+class Image(CreateMixin, UpdateMixin, SoftDeleteMixin):
+    user = models.ForeignKey("accounts.UserModel", on_delete=models.PROTECT, related_name="user_upload_user",
+                             null=True)
     # فیلدهای اصلی
     title = models.CharField(
         max_length=200,
@@ -23,10 +26,12 @@ class Image(CreateMixin, UpdateMixin):
         verbose_name="فایل تصویر",
         help_text="فرمت‌های پشتیبانی: JPG, PNG, WebP",
         width_field="image_width",
-        height_field="image_height"
+        height_field="image_height",
+        validators=[validate_image_size]
     )
     image_width = models.PositiveIntegerField(editable=False, null=True)
     image_height = models.PositiveIntegerField(editable=False, null=True)
+    image_url = models.CharField(max_length=255, editable=False, null=True)
 
     # متادیتا
     # alt_text = models.CharField(
@@ -68,11 +73,11 @@ class Image(CreateMixin, UpdateMixin):
     )
 
     # فعال/غیرفعال
-    is_active = models.BooleanField(
-        default=True,
-        verbose_name="فعال",
-        help_text="نمایش/عدم نمایش تصویر در سایت"
-    )
+    # is_active = models.BooleanField(
+    #     default=True,
+    #     verbose_name="فعال",
+    #     help_text="نمایش/عدم نمایش تصویر در سایت"
+    # )
 
     class Meta:
         verbose_name = "تصویر"
@@ -87,6 +92,7 @@ class Image(CreateMixin, UpdateMixin):
         if self.image_file:
             self.file_size = self.image_file.size
             self.file_format = os.path.splitext(self.image_file.name)[1][1:].upper()
+            self.image_url = self.image_file.url
         super().save(*args, **kwargs)
 
 

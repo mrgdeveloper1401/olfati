@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "core",
     "litner",
     "markethub",
-    "catalog_app",
+    "catalog_app.apps.CatalogAppConfig",
     # "django_celery_results",
     # 'django_celery_beat',
     "drf_spectacular",
@@ -60,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # "olfati_django.custom_middlewere.CurrentUserMiddleware"
 ]
 
 ROOT_URLCONF = 'olfati_django.urls'
@@ -133,7 +134,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=90),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
     'ALGORITHM': 'HS256',
 }

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.files import images
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from olfati_django.settings import MEDIA_URL, MEDIA_ROOT, DEBUG
@@ -7,7 +8,8 @@ v1_api = [
     path('v1/account/', include('accounts.urls')),
     path('v1/exam/', include('exam.urls')),
     path('v1/linter/', include('litner.urls')),
-    path('v1/markethub/', include('markethub.urls'))
+    path('v1/markethub/', include('markethub.urls')),
+    path("v1/images/", include('catalog_app.urls')),
 ]
 
 urlpatterns = [

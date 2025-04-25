@@ -6,19 +6,21 @@ from .models import Image
 @admin.register(Image)
 class ImageAdmin(admin.ModelAdmin):
     # تنظیمات نمایش لیست تصاویر
-    list_display = ('title', 'file_format', 'file_size_mb', 'is_active', 'created_at')
-    list_filter = ('is_active', 'file_format', 'created_at')
+    list_display = ('title', "id", 'file_format', 'file_size_mb', 'created_at')
+    list_filter = ('file_format', 'created_at')
     search_fields = ('title', )
     search_help_text = "برای جست و جو میتوانید از عنوان عکس استفاده کنید"
-    readonly_fields = ('thumbnail_preview', 'file_format', 'file_size', 'image_width', 'image_height', 'created_at', 'updated_at')
-    list_editable = ('is_active',)  # امکان تغییر وضعیت فعال/غیرفعال مستقیم از لیست
+    readonly_fields = ('thumbnail_preview', 'file_format', 'file_size', 'image_width', 'image_height', 'created_at',
+                       'updated_at', "image_url")
+    # list_editable = ('is_active',)  # امکان تغییر وضعیت فعال/غیرفعال مستقیم از لیست
     ordering = ('-created_at',)
     list_per_page = 20
+    raw_id_fields = ("user",)
 
     # فیلدهای گروه‌بندی شده در صفحه ویرایش
     fieldsets = (
         ('اطلاعات اصلی', {
-            'fields': ('title', 'image_file', 'thumbnail_preview', 'caption', 'is_active')
+            'fields': ('title', "user", 'image_file', 'thumbnail_preview', 'caption', "image_url")
         }),
         ('مشخصات فایل', {
             'fields': ('file_format', 'file_size', 'image_width', 'image_height'),
