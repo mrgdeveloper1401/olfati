@@ -30,11 +30,11 @@ from rest_framework import permissions
 #         return getattr(payment,'has_access',True)
 
 
-class IsOwnerOrReadOnlyLinterModel(permissions.IsAuthenticated):
+class IsOwnerOrReadOnlyLinterModel(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         return bool(obj.myclass.author == request.user)
 
 
-class IsOwnerOrReadOnlyLinterClass(permissions.IsAuthenticated):
+class IsOwnerOrReadOnlyLinterClass(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         return bool(obj.author == request.user)
