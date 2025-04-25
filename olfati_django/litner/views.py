@@ -22,7 +22,7 @@ class LinterClassViewSet(viewsets.ModelViewSet):
         "updated_at", "cover_image__image_url"
     ).select_related("cover_image")
     pagination_class = CommonPagination
-    permission_classes = (IsOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
 
     # def get_permissions(self):
     #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
