@@ -7,7 +7,7 @@ from . import serializer, models
 import logging
 
 from utils.vlaidations import CommonPagination
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnlyLinterModel, IsOwnerOrReadOnlyLinterClass
 
 logger = logging.getLogger(__name__)
 permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
@@ -22,7 +22,7 @@ class LinterClassViewSet(viewsets.ModelViewSet):
         "updated_at", "cover_image__image_url"
     ).select_related("cover_image")
     pagination_class = CommonPagination
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnlyLinterClass,)
 
     # def get_permissions(self):
     #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
@@ -43,7 +43,7 @@ class LinterClassViewSet(viewsets.ModelViewSet):
 class LinterSeasonViewSet(viewsets.ModelViewSet):
     pagination_class = CommonPagination
     serializer_class = serializer.LinterSerializer
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnlyLinterModel)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

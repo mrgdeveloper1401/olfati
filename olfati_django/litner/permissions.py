@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthenticated
+from rest_framework import permissions
 
 
 # پرمیشن برای سوپر یوزر
@@ -30,6 +30,11 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS, IsAuthentic
 #         return getattr(payment,'has_access',True)
 
 
-class IsOwnerOrReadOnly(BasePermission):
+class IsOwnerOrReadOnlyLinterModel(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
         return bool(obj.myclass.author == request.user)
+
+
+class IsOwnerOrReadOnlyLinterClass(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return bool(obj.author == request.user)
