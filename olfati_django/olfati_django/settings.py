@@ -13,11 +13,9 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from decouple import config
-from django.conf.global_settings import STORAGES
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)

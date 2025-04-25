@@ -3,6 +3,8 @@ from olfati_django.settings import *
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("DEVELOPMENT_SECRET_KEY", cast=str)
 
+ALLOWED_HOSTS = ['*']
+
 INSTALLED_APPS += [
     "debug_toolbar"
 ]
