@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework_nested import routers
 
 from litner.views import LinterSeasonViewSet, LinterClassViewSet, LinterBoxViewSet, LinterFlashCartViewSet, \
-    LinterUserAnswerView
+    LinterUserAnswerView, SaleLinterSeasonViewSet
 
 router = routers.SimpleRouter()
 
@@ -11,6 +11,7 @@ router.register("class", LinterClassViewSet, basename="linter-class")
 
 linter_class_router = routers.NestedSimpleRouter(router, "class", lookup="class")
 linter_class_router.register("season", LinterSeasonViewSet, basename="linter-season")
+linter_class_router.register("sale_season", SaleLinterSeasonViewSet, basename="linter-sale-season")
 
 linter_session_router = routers.NestedSimpleRouter(linter_class_router, r"season",
                                                    lookup="season")

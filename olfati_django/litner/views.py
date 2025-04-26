@@ -75,34 +75,20 @@ class LinterSeasonViewSet(viewsets.ModelViewSet):
         ).only(
         "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
             "cover_image__image_url", "created_at", "updated_at", "myclass__author__first_name",
-            "myclass__author__last_name",
+            "myclass__author__last_name", "is_sale"
     ).select_related("myclass__author", "cover_image")
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #     if not (instance.is_author(request.user) or instance.is_paid_user(request.user)):
-    #         return permission_error
-    #
-    #     try:
-    #         karname = LitnerKarNameModel.objects.get(user=request.user, exam_id=instance)
-    #     except LitnerKarNameModel.DoesNotExist:
-    #         questions_to_display = LitnerQuestionModel.objects.filter(litner=instance)
-    #     else:
-    #         if timezone.now() < karname.completed_at + timedelta(hours=24):
-    #             return Response({'message': 'you cant take another exam'}, status.HTTP_403_FORBIDDEN)
-    #
-    #         if timezone.now() >= karname.completed_at + timedelta(days=3):
-    #             questions_to_display = LitnerQuestionModel.objects.filter(litner=instance)
-    #         else:
-    #             questions_to_display = LitnerQuestionModel.objects.filter(
-    #                 Q(user_answers__isnull=True) | Q(user_answers__is_correctt__isnull=True) |
-    #                 Q(user_answers__is_correctt=False), litner=instance
-    #             )
-    #
-    #     serializer = self.get_serializer(instance,
-    #                                      context={'request': request, 'questions_to_display': questions_to_display})
-    #     data = serializer.data.get('question')
-    #     return Response({'data': data})
+
+class SaleLinterSeasonViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    serializer_class = serializer.LinterSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        return models.LinterModel.objects.filter(is_sale=True, myclass_id=self.kwargs['class_pk']).only(
+        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
+            "cover_image__image_url", "created_at", "updated_at", "myclass__author__first_name",
+            "myclass__author__last_name", "is_sale"
+        ).select_related("myclass__author", "cover_image")
 
 
 class LitnerView(APIView):
