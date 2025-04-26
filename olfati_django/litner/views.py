@@ -14,6 +14,10 @@ permission_error = Response({'اجازه این کار را ندارید.'}, sta
 
 
 class LinterClassViewSet(viewsets.ModelViewSet):
+    """
+    for filter query set you should authenticate, and you can use this
+    ?is_owner=1 --> List of created classes
+    """
     serializer_class = serializer.MyLinterClassSerializer
     queryset = models.MyLinterClass.objects.select_related(
         "author"
@@ -23,6 +27,13 @@ class LinterClassViewSet(viewsets.ModelViewSet):
     ).select_related("cover_image")
     pagination_class = CommonPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnlyLinterClass,)
+
+    def filter_queryset(self, queryset):
+        is_owner = self.request.query_params.get("is_owner", None)
+
+        if (is_owner == "1" or is_owner == 1) and self.request.user.is_authenticated :
+            return queryset.filter(author=self.request.user)
+        return queryset
 
     # def get_permissions(self):
     #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
