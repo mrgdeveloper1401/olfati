@@ -1,9 +1,8 @@
-import codecs
-
-# from django.contrib.auth.models import Group
-from rest_framework import status, response, views, mixins, viewsets, permissions
+from rest_framework import status, response, views, mixins, viewsets, permissions, generics, decorators
 from rest_framework_simplejwt.tokens import RefreshToken
-# from django.contrib.auth import authenticate
+
+from litner.models import MyLinterClass, LinterModel
+from litner.serializer import MyLinterClassSerializer, LinterSerializer
 
 from utils.sed_code import send_sms_verify
 from .models import OtpModel, UserModel
@@ -84,75 +83,6 @@ class VerifyOTPView(views.APIView):
                 )
 
 
-# class AdminLoginView(views.APIView):
-    #  permission_classes = [AllowAny]
-
-    # def post(self, request):
-    #     username = request.data.get('username')
-    #     # password = request.data.get('password')
-    #     user = authenticate(username=username)
-    #     if user is not None and user.is_superuser:
-    #         refresh = RefreshToken.for_user(user)
-    #         return response.Response({
-    #             'refresh': str(refresh),
-    #             'access': str(refresh.access_token),
-    #         })
-    #     else:
-    #         return response.Response({'error': 'Invalid Credentials or Not Superuser'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-# class ResetPasswordView(views.APIView):
-#     def post(self, request):
-#         username = request.data.get('username')
-#         new_password = request.data.get('new_password')
-#         try:
-#             user = UserModel.objects.get(username=username)
-#             user.set_password(new_password)
-#             user.save()
-
-            # اضافه کردن کاربر به گروه مورد نظر (مثلاً گروه staff)
-            # staff_group = Group.objects.get(name='teacher')  # فرضاً که گروهی به نام staff وجود دارد
-            # user.groups.add(staff_group)
-
-        #     return response.Response({'message': 'Password reset successfully. User now has access to admin panel.'})
-        # except UserModel.DoesNotExist:
-        #     return response.Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-
-# class EditProfileView(views.APIView):
-#     def post(self, request):
-        # if not request.user.is_superuser:
-        #    return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
-
-        # username = request.data.get('username')
-        # new_username = request.data.get('new_username', None)
-        # first_name = request.data.get('first_name', None)
-        # last_name = request.data.get('last_name', None)
-        # study_field = request.data.get('study_field', None)
-        # melli_code = request.data.get('melli_code', None)
-        # phone_number = request.data.get('phone_number', None)
-        # try:
-        #     user = UserModel.objects.get(username=username)
-        #     if new_username:
-        #         user.username = new_username
-        #     if last_name:
-        #         user.last_name = last_name
-        #     if first_name:
-        #         user.first_name = first_name
-        #     if study_field:
-        #         user.study_field = study_field
-        #     if melli_code:
-        #         user.melli_code = melli_code
-        #     if phone_number:
-        #         user.phone_number = phone_number
-        #     user.save()
-            # سریالایز و برگرداندن داده‌های کاربر
-            # user_data = serializer.UserSerializers(user).data
-            # return response.Response({'message': 'Profile updated successfully', 'data': user_data})
-        # except UserModel.DoesNotExist:
-        #     return response.Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-
 class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin, viewsets.GenericViewSet):
     queryset = UserModel.objects.only('first_name', "last_name", 'study_field', 'username', 'melli_code',
@@ -165,3 +95,26 @@ class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Up
             return self.queryset
         else:
             return self.queryset.filter(id=self.request.user.id)
+
+
+class ProfileLinterClassView(generics.ListAPIView):
+    serializer_class = MyLinterClassSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get_queryset(self):
+        return MyLinterClass.objects.filter(author=self.request.user).only(
+        "author__first_name", "author__last_name", "title", "study_field", "cover_image__title", "created_at",
+        "updated_at", "cover_image__image_url"
+    ).select_related("cover_image")
+
+
+class ProfileLinterSeasonView(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    serializer_class = LinterSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        return LinterModel.objects.filter(myclass__author=self.request.user).only(
+        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
+            "cover_image__image_url", "created_at", "updated_at", "myclass__author__first_name",
+            "myclass__author__last_name",
+    ).select_related("myclass__author", "cover_image")
