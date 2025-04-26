@@ -115,7 +115,7 @@ class MyLinterClassSerializer(serializers.ModelSerializer):
         read_only_fields = ("author",)
 
     def get_author_full_name(self, obj):
-        return obj.author.get_full_name()
+        return obj.author.get_full_name() if obj.author.get_full_name else None
 
     def get_cover_image_url(self, obj):
         return obj.cover_image.image_url

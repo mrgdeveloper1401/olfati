@@ -1,4 +1,4 @@
-from rest_framework import status, permissions, viewsets, mixins, generics
+from rest_framework import status, permissions, viewsets, mixins, generics, decorators, response
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -34,6 +34,13 @@ class LinterClassViewSet(viewsets.ModelViewSet):
         if (is_owner == "1" or is_owner == 1) and self.request.user.is_authenticated :
             return queryset.filter(author=self.request.user)
         return queryset
+
+    @decorators.action(methods=['GET'], detail=False, url_path="my-classes")
+    def get_my_classes(self, request):
+        queryset = self.queryset.filter(author=self.request.user)
+        return response.Response(
+            self.get_serializer(queryset, many=True).data,
+        )
 
     # def get_permissions(self):
     #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
