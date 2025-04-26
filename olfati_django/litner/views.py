@@ -56,8 +56,9 @@ class LinterSeasonViewSet(viewsets.ModelViewSet):
             # paid_users=self.request.user
         ).only(
         "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
-            "cover_image__image_url", "created_at", "updated_at",
-    ).select_related("myclass__author")
+            "cover_image__image_url", "created_at", "updated_at", "myclass__author__first_name",
+            "myclass__author__last_name",
+    ).select_related("myclass__author", "cover_image")
 
     # def retrieve(self, request, *args, **kwargs):
     #     instance = self.get_object()

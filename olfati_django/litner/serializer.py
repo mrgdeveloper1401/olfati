@@ -56,6 +56,9 @@ class LinterSerializer(serializers.ModelSerializer):
     cover_image = serializers.PrimaryKeyRelatedField(
         queryset=Image.objects.only("title"),
     )
+    author_full_name = serializers.SerializerMethodField()
+    cover_image_url = serializers.SerializerMethodField()
+    is_paid = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LinterModel
@@ -67,6 +70,15 @@ class LinterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         linter_class = self.context['linter_class_pk']
         return models.LinterModel.objects.create(myclass_id=linter_class, **validated_data)
+
+    def get_author_full_name(self, obj):
+        return obj.myclass.author.get_full_name()
+
+    def get_cover_image_url(self, obj):
+        return obj.cover_image.image_url
+
+    def get_is_paid(self, obj):
+        return obj.paid_users == self.context['request'].user
 
     def validate(self, attrs):
         user = self.context['request'].user
