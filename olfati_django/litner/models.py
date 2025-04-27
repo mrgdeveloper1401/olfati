@@ -14,7 +14,7 @@ class MyLinterClass(OwnerMixin, CreateMixin, UpdateMixin, SoftDeleteMixin):
 
     title = models.CharField(verbose_name="عنوان", max_length=255)
     study_field = models.CharField(max_length=100, verbose_name="رشته تحصیلی")
-    cover_image = models.ForeignKey("catalog_app.Image", on_delete=models.PROTECT, blank=True)
+    cover_image = models.ImageField(upload_to="linter_class/%Y/%m/%d", null=True)
     author = models.ForeignKey(UserModel, on_delete=models.PROTECT, verbose_name="نویسنده")
 
     def __str__(self):
@@ -31,8 +31,7 @@ class LinterModel(OwnerMixin, CreateMixin, UpdateMixin, SoftDeleteMixin):
 
     title = models.CharField(verbose_name='عنوان', max_length=255)
     description = models.TextField()
-    cover_image = models.ForeignKey("catalog_app.Image", on_delete=models.PROTECT, blank=True,
-                                    related_name='linter_cover_image')
+    cover_image = models.ImageField(upload_to="linter_season/%Y/%m/%d", null=True)
     price = models.FloatField(verbose_name='قیمیت فصل')
     myclass = models.ForeignKey(MyLinterClass, related_name='linter', on_delete=models.PROTECT,
                                 verbose_name='کلاس مربوطه')

@@ -9,14 +9,14 @@ class LinterModelAdmin(admin.ModelAdmin):
     list_display = ("title", "price", "myclass", "paid_user_count", "is_sale")
     list_select_related = ("myclass", )
     list_editable = ("is_sale",)
-    raw_id_fields = ("myclass", "cover_image")
+    raw_id_fields = ("myclass",)
     search_fields = ("title",)
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
     # actions = ("update_list_is_publish_false", "update_list_is_publish_true")
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("paid_users").only(
-            "title", "description", "price", "myclass__title", "paid_users", "cover_image__title", 'is_sale'
+            "title", "description", "price", "myclass__title", "paid_users", "cover_image", 'is_sale'
         )
 
     # @admin.action(description='update list is publish, false')
@@ -30,7 +30,7 @@ class LinterModelAdmin(admin.ModelAdmin):
 
 @admin.register(models.MyLinterClass)
 class MyLinterClassAdmin(admin.ModelAdmin):
-    raw_id_fields = ("author", "cover_image")
+    raw_id_fields = ("author",)
     list_display = ("author", "title", "created_at")
     list_per_page = 20
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
@@ -39,7 +39,7 @@ class MyLinterClassAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).only(
-            "author__phone_number", "title", "cover_image__title", "study_field", "created_at", "updated_at")
+            "author__phone_number", "title", "cover_image", "study_field", "created_at", "updated_at")
 
     # @admin.action(description='update list is publish, false')
     # def update_list_is_publish_false(self, request, queryset):
