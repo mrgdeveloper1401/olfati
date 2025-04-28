@@ -57,63 +57,6 @@ class LinterModel(CreateMixin, UpdateMixin, SoftDeleteMixin):
         return self.title
 
 
-# TODO remove model LitnerQuestionModel, UserQuestionAnswerCount, LitnerKarNameModel LitnerAnswer, LitnerKarNameDBModel
-# class LitnerQuestionModel(CreateMixin, UpdateMixin):
-#     class Meta:
-#         db_table = "linter_question"
-#         verbose_name = 'سوال'
-#         verbose_name_plural = 'سوالات'
-#
-#     litner = models.ForeignKey(LitnerModel, on_delete=models.PROTECT, related_name='question', verbose_name="فصل")
-#     question_text = models.CharField(max_length=255, verbose_name="سوال را وارد کنید")
-#     answers_text = models.TextField(verbose_name="جواب را وارد کنید")
-#     hide_question = models.BooleanField(default=False)
-#     is_publish = models.BooleanField(default=True)
-
-
-# class UserQuestionAnswerCount(CreateMixin, UpdateMixin):
-#     user = models.ForeignKey(UserModel, on_delete=models.PROTECT, verbose_name="کاربر")
-#     question = models.ForeignKey(LitnerQuestionModel, related_name='user_answers', on_delete=models.PROTECT, verbose_name="سوال")
-#     is_correctt = models.BooleanField(default=False, null=True)
-#     answered_at = models.DateTimeField(auto_now_add=True, null=True)
-#     is_publish = models.BooleanField(default=True)
-#
-#     class Meta:
-#         db_table = "linter_user_answer_count"
-#         unique_together = ('user', 'question')  # Ensure that each user can only have one count for each question
-
-
-# class LitnerKarNameModel(CreateMixin, UpdateMixin):
-#     class Meta:
-#         db_table = "report_cart"
-#         verbose_name = 'کارنامه'
-#         verbose_name_plural = 'کارنامه ها'
-#
-#     exam_id = models.OneToOneField(LitnerModel, on_delete=models.PROTECT, related_name='exam_id', verbose_name="فصل")
-#     user = models.ForeignKey(UserModel, on_delete=models.PROTECT, verbose_name="کاربر")
-#     completed_at = models.DateTimeField(default=timezone.now, null=True, blank=True, verbose_name="کامل شده در")
-
-
-# class LitnerAnswer(CreateMixin, UpdateMixin):
-#     karname = models.ForeignKey(LitnerKarNameModel, on_delete=models.PROTECT, related_name="litner_azmon",
-#                                 verbose_name="کارنامه")
-#     question = models.ForeignKey(LitnerQuestionModel, on_delete=models.PROTECT, verbose_name="سوال")
-#     is_correct = models.BooleanField(default=False, verbose_name="صحیح بودن")
-#
-#     class Meta:
-#         db_table = "linter_answer"
-
-
-# class LitnerKarNameDBModel(CreateMixin, UpdateMixin):
-#     question = models.ForeignKey(LitnerQuestionModel, on_delete=models.PROTECT, related_name='question_id')
-#     is_correct = models.BooleanField(null=True)
-#     karname = models.ForeignKey(LitnerKarNameModel, on_delete=models.PROTECT, related_name="karname")
-#     answered_at = models.DateTimeField(auto_now_add=True, null=True)
-#
-#     class Meta:
-#         db_table = "linter_report_cart"
-
-
 class LeitnerBox(CreateMixin, UpdateMixin):
     """
     مدل برای خانه‌های لایتنر (5 خانه)
@@ -148,14 +91,14 @@ class LeitnerBox(CreateMixin, UpdateMixin):
 
 
 class LinterFlashCart(CreateMixin, UpdateMixin):
-    box = models.ForeignKey(LeitnerBox, on_delete=models.PROTECT, related_name="flash_cart")
+    box = models.PositiveIntegerField(default=1)
     question_text = models.CharField(max_length=255, verbose_name="سوال را وارد کنید")
     answers_text = models.TextField(max_length=200, verbose_name="جواب را وارد کنید", blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
     @property
     def get_box_number(self):
-        return self.box.box_number
+        return self.box
 
     class Meta:
         db_table = 'linter_flash_cart'

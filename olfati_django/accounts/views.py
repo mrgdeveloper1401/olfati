@@ -117,3 +117,12 @@ class ProfileLinterSeasonView(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
         "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_at",
             "updated_at", "cover_image",  "myclass__author__first_name", "myclass__author__last_name", "is_sale"
     ).select_related("myclass__author",)
+
+
+class SaleLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    serializer_class = MyLinterClassSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    def get_queryset(self):
+        return MyLinterClass.objects.filter(
+            linter__paid_users=self.request.user
+    ).distinct()

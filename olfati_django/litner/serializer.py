@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers, generics, exceptions
 
 from . import models
@@ -12,6 +13,7 @@ class LinterSerializer(serializers.ModelSerializer):
         model = models.LinterModel
         exclude = ("is_deleted", "deleted_at", "paid_users", "myclass")
 
+    @extend_schema_field(serializers.BooleanField())
     def get_is_author_season_class(self, obj):
         return obj.myclass.author_id == self.context['request'].user.id
 
@@ -25,6 +27,7 @@ class LinterSerializer(serializers.ModelSerializer):
     def get_cover_image_url(self, obj):
         return obj.cover_image.url
 
+    @extend_schema_field(serializers.BooleanField())
     def get_is_paid(self, obj):
         return obj.paid_users == self.context['request'].user
 
@@ -92,7 +95,6 @@ class CreateFlashCartSerializer(serializers.Serializer):
     def create(self, validated_data):
         lst = [
             models.LinterFlashCart(
-                box_id = int(self.context['linter_box_pk']),
                 question_text=i.get("question_text"),
                 answers_text=i.get("answers_text"),
             )
@@ -107,19 +109,7 @@ class CreateFlashCartSerializer(serializers.Serializer):
 class LinterFlashCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.LinterFlashCart
-        fields = ("id", "question_text", "answers_text", "box", "get_box_number")
-        read_only_fields = ("box",)
-
-    def create(self, validated_data):
-        linter_box_pk = self.context['linter_box_pk']
-        return models.LinterFlashCart.objects.create(box_id=linter_box_pk, **validated_data)
-
-    def validate(self, attrs):
-        try:
-            generics.get_object_or_404(models.LeitnerBox, id=self.context['linter_box_pk'])
-        except models.LinterFlashCart.DoesNotExist as e:
-            raise e
-        return attrs
+        fields = ("id", "question_text", "answers_text", "box",)
 
 
 class LinterUserAnswerSerializer(serializers.ModelSerializer):

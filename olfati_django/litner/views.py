@@ -72,7 +72,6 @@ class LinterSeasonViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return models.LinterModel.objects.filter(
             myclass_id=self.kwargs['class_pk'],
-            # paid_users=self.request.user
         ).only(
         "title", "price", 'description', 'created_at', "myclass__author__phone_number", "cover_image",
             "created_at", "updated_at", "myclass__author__first_name", "myclass__author__last_name", "is_sale"
@@ -384,18 +383,7 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
     #     return super().get_permissions()
 
     def get_queryset(self):
-        return models.LinterFlashCart.objects.filter(
-            box_id=self.kwargs['box_pk'], box__linter_id=self.kwargs['season_pk'],
-            box__linter__myclass_id=self.kwargs['class_pk'],
-            box__linter__paid_users=self.request.user
-        ).select_related("box").only(
-            "question_text", "answers_text", "box__box_number"
-        )
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['linter_box_pk'] = self.kwargs['box_pk']
-        return context
+        return models.LinterFlashCart.objects.only("question_text", "answers_text", "box")
 
     def get_serializer_class(self):
         if self.action == "create":

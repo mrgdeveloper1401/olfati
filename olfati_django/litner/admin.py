@@ -6,7 +6,7 @@ from . import models
 @admin.register(models.LinterModel)
 class LinterModelAdmin(admin.ModelAdmin):
     filter_horizontal = ("paid_users",)
-    list_display = ("title", "price", "myclass", "paid_user_count", "is_sale")
+    list_display = ("title", "id", "price", "myclass", "paid_user_count", "is_sale")
     list_select_related = ("myclass", )
     list_editable = ("is_sale",)
     raw_id_fields = ("myclass",)
@@ -31,7 +31,7 @@ class LinterModelAdmin(admin.ModelAdmin):
 @admin.register(models.MyLinterClass)
 class MyLinterClassAdmin(admin.ModelAdmin):
     raw_id_fields = ("author",)
-    list_display = ("author", "title", "created_at")
+    list_display = ("author", "id", "title", "created_at")
     list_per_page = 20
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
     search_fields = ("title",)
@@ -96,13 +96,11 @@ class LeitnerBoxAdmin(admin.ModelAdmin):
 
 @admin.register(models.LinterFlashCart)
 class LinterFlashCartAdmin(admin.ModelAdmin):
-    raw_id_fields = ("box", )
     list_display = ("box", "is_active", "created_at")
     list_editable = ("is_active",)
     list_per_page = 20
-    list_select_related = ("box",)
 
     def get_queryset(self, request):
         return super().get_queryset(request).only(
-            "is_active", "box__box_number", "is_active", "created_at"
+            "is_active", "box", "is_active", "created_at"
         )

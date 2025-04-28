@@ -6,6 +6,7 @@ from .views import ProfileViewSet
 
 router = routers.SimpleRouter()
 router.register('profile', ProfileViewSet, basename="user_profile")
+router.register("sale_linter_class", views.SaleLinterClassViewSet, basename="sale_linter_class")
 
 urlpatterns = [
     path("profile/linter_class/", views.ProfileLinterClassView.as_view(), name='profile_linter_class'),
