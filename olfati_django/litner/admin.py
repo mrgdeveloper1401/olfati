@@ -74,11 +74,12 @@ class UserProgressAdmin(admin.ModelAdmin):
 @admin.register(models.LeitnerBox)
 class LeitnerBoxAdmin(admin.ModelAdmin):
     raw_id_fields = ("linter",)
-    list_display = ("linter", "box_number", "created_at")
+    list_display = ("linter", "id", "linter_id", "box_number", "created_at")
     list_per_page = 20
     actions = ("update_list_is_active_false", "update_list_is_active_true")
     list_select_related = ("linter__myclass",)
-
+    search_fields = ("linter__title",)
+    search_help_text = "برای سرچ کردن میتوانید از عنوان فصل استفاده کنید"
     def get_queryset(self, request):
         return super().get_queryset(request).only(
             "linter__title", "created_at", 'box_number', "linter__myclass__title"

@@ -9,7 +9,7 @@ router.register('profile', ProfileViewSet, basename="user_profile")
 
 urlpatterns = [
     path("profile/linter_class/", views.ProfileLinterClassView.as_view(), name='profile_linter_class'),
-    path("profile/linter_class/<int:pk>/linter_season/",
+    path("profile/linter_class/<int:class_pk>/linter_season/",
          views.ProfileLinterSeasonView.as_view({"get": "list"}),
          name='profile_linter_season'),
     path("login", views.SendCode.as_view(), name='user_login'),

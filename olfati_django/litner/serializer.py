@@ -37,7 +37,7 @@ class MyLinterClassSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.MyLinterClass
-        exclude = ("is_deleted", "deleted_at", "created_by")
+        exclude = ("is_deleted", "deleted_at",)
         read_only_fields = ("author",)
 
     def get_author_full_name(self, obj):
@@ -79,6 +79,29 @@ class UserLinterBoxSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.LeitnerBox
         fields = ("id", "box_number")
+
+
+class FieldLinterFlashCartSerializer(serializers.Serializer):
+    question_text = serializers.CharField()
+    answers_text = serializers.CharField()
+
+
+class CreateFlashCartSerializer(serializers.Serializer):
+    cart = FieldLinterFlashCartSerializer(many=True)
+
+    def create(self, validated_data):
+        lst = [
+            models.LinterFlashCart(
+                box_id = int(self.context['linter_box_pk']),
+                question_text=i.get("question_text"),
+                answers_text=i.get("answers_text"),
+            )
+            for i in validated_data.get("cart")
+        ]
+        if lst:
+            created = models.LinterFlashCart.objects.bulk_create(lst)
+            return {"cart": created}
+        return []
 
 
 class LinterFlashCartSerializer(serializers.ModelSerializer):

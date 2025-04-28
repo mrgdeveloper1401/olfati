@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import status, permissions, viewsets, mixins, generics, decorators, response
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -73,9 +74,8 @@ class LinterSeasonViewSet(viewsets.ModelViewSet):
             myclass_id=self.kwargs['class_pk'],
             # paid_users=self.request.user
         ).only(
-        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
-            "cover_image", "created_at", "updated_at", "myclass__author__first_name",
-            "myclass__author__last_name", "is_sale"
+        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "cover_image",
+            "created_at", "updated_at", "myclass__author__first_name", "myclass__author__last_name", "is_sale"
     ).select_related("myclass__author",)
 
 
@@ -341,9 +341,10 @@ class LinterBoxViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
     def get_queryset(self):
         return models.LeitnerBox.objects.filter(
             linter_id=self.kwargs['season_pk'],
-            linter__myclass_id=self.kwargs['class_pk'],
-            linter__paid_users=self.request.user
-        ).only("box_number")
+            linter__myclass_id=self.kwargs['class_pk']
+        ).filter(
+            Q(linter__myclass__author=self.request.user) | Q(linter__paid_users=self.request.user)
+        ).only("box_number",)
     serializer_class = serializer.UserLinterBoxSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -371,7 +372,7 @@ class LinterBoxViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
     #     return context
 
 
-class LinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class LinterFlashCartViewSet(viewsets.ModelViewSet):
     serializer_class = serializer.LinterFlashCartSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -391,10 +392,15 @@ class LinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, v
             "question_text", "answers_text", "box__box_number"
         )
 
-    # def get_serializer_context(self):
-    #     context = super().get_serializer_context()
-    #     context['linter_box_pk'] = self.kwargs['box_pk']
-    #     return context
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['linter_box_pk'] = self.kwargs['box_pk']
+        return context
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return serializer.CreateFlashCartSerializer
+        return super().get_serializer_class()
 
 
 class LinterUserAnswerView(generics.CreateAPIView):

@@ -103,9 +103,9 @@ class ProfileLinterClassView(generics.ListAPIView):
     
     def get_queryset(self):
         return MyLinterClass.objects.filter(author=self.request.user).only(
-        "author__first_name", "author__last_name", "title", "study_field", "cover_image__title", "created_at",
-        "updated_at", "cover_image__image_url"
-    ).select_related("cover_image")
+        "author__first_name", "author__last_name", "title", "study_field", "created_at", "cover_image",
+        "updated_at",
+    )
 
 
 class ProfileLinterSeasonView(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -114,7 +114,6 @@ class ProfileLinterSeasonView(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
 
     def get_queryset(self):
         return LinterModel.objects.filter(myclass__author=self.request.user).only(
-        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
-            "cover_image__image_url", "created_at", "updated_at", "myclass__author__first_name",
-            "myclass__author__last_name",
-    ).select_related("myclass__author", "cover_image")
+        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_at",
+            "updated_at", "cover_image",  "myclass__author__first_name", "myclass__author__last_name", "is_sale"
+    ).select_related("myclass__author",)

@@ -2,10 +2,10 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from accounts.models import UserModel
-from core.models import CreateMixin, UpdateMixin, SoftDeleteMixin, OwnerMixin
+from core.models import CreateMixin, UpdateMixin, SoftDeleteMixin
 
 
-class MyLinterClass(OwnerMixin, CreateMixin, UpdateMixin, SoftDeleteMixin):
+class MyLinterClass(CreateMixin, UpdateMixin, SoftDeleteMixin):
     class Meta:
         db_table = "linter_class"
         verbose_name = 'کلاس'
@@ -22,7 +22,7 @@ class MyLinterClass(OwnerMixin, CreateMixin, UpdateMixin, SoftDeleteMixin):
 
     # def is_author_class(self):
 
-class LinterModel(OwnerMixin, CreateMixin, UpdateMixin, SoftDeleteMixin):
+class LinterModel(CreateMixin, UpdateMixin, SoftDeleteMixin):
     class Meta:
         db_table = "linter_model"
         verbose_name = 'فصل'
@@ -114,7 +114,7 @@ class LinterModel(OwnerMixin, CreateMixin, UpdateMixin, SoftDeleteMixin):
 #         db_table = "linter_report_cart"
 
 
-class LeitnerBox(OwnerMixin, CreateMixin, UpdateMixin):
+class LeitnerBox(CreateMixin, UpdateMixin):
     """
     مدل برای خانه‌های لایتنر (5 خانه)
     """
@@ -147,7 +147,7 @@ class LeitnerBox(OwnerMixin, CreateMixin, UpdateMixin):
         self.save()
 
 
-class LinterFlashCart(OwnerMixin, CreateMixin, UpdateMixin):
+class LinterFlashCart(CreateMixin, UpdateMixin):
     box = models.ForeignKey(LeitnerBox, on_delete=models.PROTECT, related_name="flash_cart")
     question_text = models.CharField(max_length=255, verbose_name="سوال را وارد کنید")
     answers_text = models.TextField(max_length=200, verbose_name="جواب را وارد کنید", blank=True, null=True)
@@ -163,7 +163,7 @@ class LinterFlashCart(OwnerMixin, CreateMixin, UpdateMixin):
         verbose_name_plural = _("فلش کارت ها")
 
 
-class UserAnswer(OwnerMixin, CreateMixin, UpdateMixin):
+class UserAnswer(CreateMixin, UpdateMixin):
     class AnswerStatus(models.TextChoices):
         CORRECT = 'correct',  _('صحیح')
         WRONG = 'wrong', _('غلط')
@@ -187,7 +187,7 @@ class UserAnswer(OwnerMixin, CreateMixin, UpdateMixin):
         unique_together = ('user', 'box')
 
 
-class UserProgress(CreateMixin, UpdateMixin, SoftDeleteMixin, OwnerMixin):
+class UserProgress(CreateMixin, UpdateMixin, SoftDeleteMixin, ):
     user = models.ForeignKey(UserModel, on_delete=models.PROTECT, related_name='leitner_progress')
     linter = models.ForeignKey(LinterModel, on_delete=models.PROTECT, related_name='user_progress')
     total_questions = models.PositiveIntegerField(verbose_name=_('تعداد کل سوالات'), default=0)
