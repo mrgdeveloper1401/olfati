@@ -35,7 +35,7 @@ class SendCode(views.APIView):
     def post(self, request):
         ser = self.serializer_class(data=request.data)
         ser.is_valid(raise_exception=True)
-        phone_number = ser.validated_data['phone_number']
+        phone_number = ser.validated_data.get('phone_number')
 
         otp = OtpModel.objects.create(phone_number=phone_number)
         send_sms_verify(otp.phone_number, otp.otp_code)

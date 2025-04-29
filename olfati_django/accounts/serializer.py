@@ -1,5 +1,6 @@
 from rest_framework import serializers, exceptions
 
+from .exceptions import UserNotFound
 from .models import OtpModel, UserModel
 
 
@@ -27,25 +28,11 @@ class OtpSerializers(serializers.ModelSerializer):
 class RequestOtpSerializer(serializers.Serializer):
     phone_number = serializers.CharField()
 
-    # def validate(self, attrs):
-    #     phone=attrs.get('phone_number')
-    #     user = UserModel.objects.filter(phone_number=phone).only("phone_number").first()
-    #
-    #     if not user:
-    #         raise exceptions.NotFound()
-    #
-    #     otp = OtpModel.objects.filter(phone_number=phone).only("phone_number").last()
-    #
-    #     if otp and otp.is_expired_otp_code is False:
-    #         raise exceptions.ValidationError({"message": "you have already otp code please wait 2 minute"})
-    #
-    #     return attrs
-
     def validate(self, attrs):
-        phone=attrs.get('phone_number')
+        phone = attrs.get('phone_number')
 
         if not UserModel.objects.filter(phone_number=phone).exists():
-            raise exceptions.NotFound()
+            raise UserNotFound()
 
         otp = OtpModel.objects.filter(phone_number=phone).only("phone_number").last()
 
