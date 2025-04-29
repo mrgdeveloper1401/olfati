@@ -10,6 +10,7 @@ v1_api = [
     path('v1/linter/', include('litner.urls')),
     path('v1/markethub/', include('markethub.urls')),
     path("v1/images/", include('catalog_app.urls')),
+    path("v1/exam/", include('exam.urls')),
 ]
 
 urlpatterns = [
