@@ -39,13 +39,6 @@ class LinterClassViewSet(viewsets.ModelViewSet):
             return queryset.filter(author=self.request.user)
         return queryset
 
-    @decorators.action(methods=['GET'], detail=False, url_path="my-classes")
-    def get_my_classes(self, request):
-        queryset = self.queryset.filter(author=self.request.user)
-        return response.Response(
-            self.get_serializer(queryset, many=True).data,
-        )
-
 
 class AdminListLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """

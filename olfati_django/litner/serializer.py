@@ -38,7 +38,6 @@ class LinterSerializer(serializers.ModelSerializer):
 
 
 class MyLinterClassSerializer(serializers.ModelSerializer):
-    litners = LinterSerializer(many=True, read_only=True)
     author_full_name = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
     is_author_create_class = serializers.SerializerMethodField()
