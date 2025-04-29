@@ -85,6 +85,9 @@ class VerifyOTPView(views.APIView):
 
 class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                      mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    """
+    پروفایل کاربر
+    """
     queryset = UserModel.objects.only('first_name', "last_name", 'study_field', 'username', 'melli_code',
                                       'phone_number', 'email', 'date_joined')
     serializer_class = serializer.UserProfileSerializer
@@ -98,6 +101,9 @@ class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Up
 
 
 class ProfileLinterClassView(generics.ListAPIView):
+    """
+    کلاس هایی که توسط یک کاربر ایجاد شده باشد
+    """
     serializer_class = MyLinterClassSerializer
     permission_classes = (permissions.IsAuthenticated,)
     
@@ -109,6 +115,9 @@ class ProfileLinterClassView(generics.ListAPIView):
 
 
 class ProfileLinterSeasonView(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    فصل های هر کلاس که توسط یه کاربر ایجاد شده باشد
+    """
     serializer_class = LinterSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
@@ -120,6 +129,9 @@ class ProfileLinterSeasonView(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
 
 
 class SaleLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    اون کلاسی که کاربر حداقل یک فصل ان را خریده هست
+    """
     serializer_class = MyLinterClassSerializer
     permission_classes = (permissions.IsAuthenticated,)
     def get_queryset(self):
