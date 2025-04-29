@@ -8,6 +8,7 @@ class LinterSerializer(serializers.ModelSerializer):
     is_author_season_class = serializers.SerializerMethodField()
     author_full_name = serializers.SerializerMethodField()
     is_paid = serializers.SerializerMethodField()
+    paid_users_count = serializers.SerializerMethodField()
 
     class Meta:
         model = models.LinterModel
@@ -30,6 +31,10 @@ class LinterSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.BooleanField())
     def get_is_paid(self, obj):
         return obj.paid_users == self.context['request'].user
+
+    @extend_schema_field(serializers.IntegerField())
+    def get_paid_users_count(self, obj):
+        return obj.paid_users.count()
 
 
 class MyLinterClassSerializer(serializers.ModelSerializer):
