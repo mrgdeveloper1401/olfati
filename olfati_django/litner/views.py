@@ -43,20 +43,18 @@ class LinterClassViewSet(viewsets.ModelViewSet):
             self.get_serializer(queryset, many=True).data,
         )
 
-    # def get_permissions(self):
-    #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
-    #         self.permission_classes = (permissions.IsAdminUser,)
-    #     else:
-    #         self.permission_classes = (permissions.IsAuthenticated,)
-    #     return super().get_permissions()
-    #
-    # def get_queryset(self):
-    #     query = MyLitnerclass.objects.all()
-    #
-    #     if self.request.user.is_staff is False:
-    #         query = query.filter(is_publish=True)
-    #
-    #     return query
+
+class AdminListLinterClassViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = serializer.MyLinterClassSerializer
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get_queryset(self):
+        return models.MyLinterClass.objects.select_related(
+        "author"
+    ).only(
+        "author__first_name", "author__last_name", "title", "study_field", "cover_image", "created_at",
+        "updated_at",
+    ).filter(author__is_staff=True)
 
 
 class LinterSeasonViewSet(viewsets.ModelViewSet):
