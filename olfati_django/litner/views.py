@@ -29,7 +29,7 @@ class LinterClassViewSet(viewsets.ModelViewSet):
         "author__first_name", "author__last_name", "title", "study_field", "cover_image", "created_at",
         "updated_at",
     )
-    pagination_class = CommonPagination
+    # pagination_class = CommonPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnlyLinterClass,)
 
     def filter_queryset(self, queryset):
@@ -63,7 +63,6 @@ class AdminListLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMix
     ).filter(author__is_staff=True)
 
 
-
 class AdminListLinterSeasonViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     فصل های هر کلاس با سطح دسترسی ادمین
@@ -84,7 +83,7 @@ class LinterSeasonViewSet(viewsets.ModelViewSet):
     """
     فصل های هر کلاس
     """
-    pagination_class = CommonPagination
+    # pagination_class = CommonPagination
     serializer_class = serializer.LinterSerializer
     permission_classes = (IsOwnerOrReadOnlyLinterModel,)
 
