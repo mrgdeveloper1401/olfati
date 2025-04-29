@@ -103,8 +103,8 @@ class SaleLinterSeasonViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
 
     def get_queryset(self):
         return models.LinterModel.objects.filter(is_sale=True, myclass_id=self.kwargs['class_pk']).only(
-        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_by",
-            "cover_image", "created_at", "updated_at", "myclass__author__first_name",
+        "title", "price", 'description', 'created_at', "myclass__author__phone_number", "created_at",
+            "cover_image", "updated_at", "myclass__author__first_name",
             "myclass__author__last_name", "is_sale"
         ).select_related("myclass__author",)
 
