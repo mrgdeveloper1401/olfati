@@ -8,6 +8,7 @@ from . import serializer, models
 import logging
 
 from utils.vlaidations import CommonPagination
+from .models import LinterModel
 from .permissions import IsOwnerOrReadOnlyLinterModel, IsOwnerOrReadOnlyLinterClass
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class LinterClassViewSet(viewsets.ModelViewSet):
         )
 
 
-class AdminListLinterClassViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class AdminListLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     کلاس های لاینتر که توسط کاربر با سطح دسترسی ادمین ایجاد شده
     """
@@ -60,6 +61,23 @@ class AdminListLinterClassViewSet(mixins.ListModelMixin, viewsets.GenericViewSet
         "author__first_name", "author__last_name", "title", "study_field", "cover_image", "created_at",
         "updated_at",
     ).filter(author__is_staff=True)
+
+
+
+class AdminListLinterSeasonViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    فصل های هر کلاس با سطح دسترسی ادمین
+    یعنی اون فصل هایی که توسط ادمین ایجاد شده هست
+    یا توسطه موسسه
+    """
+    serializer_class = serializer.LinterSerializer
+    permission_classes = (permissions.IsAdminUser,)
+
+    def get_queryset(self):
+        return LinterModel.objects.filter(
+            myclass_id=self.kwargs['admin_linter_class_pk'],
+            myclass__author__is_staff=True,
+        )
 
 
 class LinterSeasonViewSet(viewsets.ModelViewSet):

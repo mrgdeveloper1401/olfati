@@ -6,26 +6,17 @@ from . import models
 @admin.register(models.LinterModel)
 class LinterModelAdmin(admin.ModelAdmin):
     filter_horizontal = ("paid_users",)
-    list_display = ("title", "id", "price", "myclass", "paid_user_count", "is_sale")
+    list_display = ("title", "id", "price", "myclass", "myclass_id", "paid_user_count", "is_sale")
     list_select_related = ("myclass", )
     list_editable = ("is_sale",)
     raw_id_fields = ("myclass",)
     search_fields = ("title",)
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
-    # actions = ("update_list_is_publish_false", "update_list_is_publish_true")
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("paid_users").only(
             "title", "description", "price", "myclass__title", "paid_users", "cover_image", 'is_sale'
         )
-
-    # @admin.action(description='update list is publish, false')
-    # def update_list_is_publish_false(self, request, queryset):
-    #     queryset.update(is_publish=False)
-    #
-    # @admin.action(description="update list is publish, true")
-    # def update_list_is_publish_true(self, request, queryset):
-    #     queryset.update(is_publish=True)
 
 
 @admin.register(models.MyLinterClass)
@@ -35,19 +26,10 @@ class MyLinterClassAdmin(admin.ModelAdmin):
     list_per_page = 20
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
     search_fields = ("title",)
-    # actions = ("update_list_is_publish_false", "update_list_is_publish_true")
 
     def get_queryset(self, request):
         return super().get_queryset(request).only(
             "author__phone_number", "title", "cover_image", "study_field", "created_at", "updated_at")
-
-    # @admin.action(description='update list is publish, false')
-    # def update_list_is_publish_false(self, request, queryset):
-    #     queryset.update(is_publish=False)
-    #
-    # @admin.action(description="update list is publish, true")
-    # def update_list_is_publish_true(self, request, queryset):
-    #     queryset.update(is_publish=True)
 
 
 @admin.register(models.UserAnswer)

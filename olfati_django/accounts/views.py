@@ -131,7 +131,7 @@ class ProfileLinterSeasonView(mixins.ListModelMixin, mixins.RetrieveModelMixin, 
     ).select_related("myclass__author",)
 
 
-class SaleLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class PurchaseLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     اون کلاسی که کاربر حداقل یک فصل ان را خریده هست
     """
@@ -141,3 +141,17 @@ class SaleLinterClassViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, v
         return MyLinterClass.objects.filter(
             linter__paid_users=self.request.user
     ).distinct()
+
+
+class PurchaseLinterSeasonViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """
+    فصل های کلاس که کاربر ان را خریده هست
+    """
+    serializer_class = LinterSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        return LinterModel.objects.filter(
+            paid_users=self.request.user,
+            myclass_id=self.kwargs['class_purchase_pk']
+        )

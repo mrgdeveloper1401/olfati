@@ -19,7 +19,19 @@ linter_session_router = routers.NestedSimpleRouter(linter_class_router, r"season
 linter_session_router.register("box", views.LinterBoxViewSet, basename="linter-box")
 
 
-urlpatterns = [
+admin_linter_class_router = routers.NestedSimpleRouter(
+    router,
+    parent_prefix="admin_list_linter_class",
+    lookup="admin_linter_class"
+)
+admin_linter_class_router.register(
+    "admin_linter_season",
+    views.AdminListLinterSeasonViewSet,
+    basename="admin_linter_season"
+)
+
+urlpatterns = ([
 
     path("answer/", views.LinterUserAnswerView.as_view(), name='linter_flash_cart_answer'),
-] + router.urls + linter_class_router.urls + linter_session_router.urls + linter_session_router.urls
+] + router.urls + linter_class_router.urls + linter_session_router.urls + linter_session_router.urls +
+               admin_linter_class_router.urls)

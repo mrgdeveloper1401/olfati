@@ -1,12 +1,15 @@
 from django.urls import path
-from rest_framework import routers
+from rest_framework_nested import routers
 
 from . import views
 from .views import ProfileViewSet
 
 router = routers.SimpleRouter()
 router.register('profile', ProfileViewSet, basename="user_profile")
-router.register("sale_linter_class", views.SaleLinterClassViewSet, basename="sale_linter_class")
+router.register("class_purchase", views.PurchaseLinterClassViewSet, basename="user_class_purchase")
+
+class_purchase = routers.NestedSimpleRouter(router, "class_purchase", lookup="class_purchase")
+class_purchase.register("season_purchase", views.PurchaseLinterSeasonViewSet, basename="season_purchase")
 
 urlpatterns = [
     path("profile/linter_class/", views.ProfileLinterClassView.as_view(), name='profile_linter_class'),
@@ -21,4 +24,4 @@ urlpatterns = [
     # path("admin-reset", views.ResetPasswordView.as_view()),
     # path("admin-edite", views.EditProfileView.as_view()),
 
-] + router.urls
+] + router.urls + class_purchase.urls

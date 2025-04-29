@@ -20,7 +20,6 @@ class MyLinterClass(CreateMixin, UpdateMixin, SoftDeleteMixin):
     def __str__(self):
         return self.title
 
-    # def is_author_class(self):
 
 class LinterModel(CreateMixin, UpdateMixin, SoftDeleteMixin):
     class Meta:
