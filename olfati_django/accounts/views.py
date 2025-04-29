@@ -65,7 +65,9 @@ class VerifyOTPView(views.APIView):
             return response.Response({"message": "otp code is expired"}, status=status.HTTP_403_FORBIDDEN)
 
         else:
-            user = UserModel.objects.filter(phone_number=phone_number).only("phone_number", "is_active").last()
+            user = UserModel.objects.filter(phone_number=phone_number).only(
+                "phone_number", "is_active", "is_staff"
+            ).last()
 
             if not user:
                 return response.Response({'message': 'you must create account'}, status.HTTP_404_NOT_FOUND)
@@ -79,6 +81,7 @@ class VerifyOTPView(views.APIView):
                 return response.Response(
                     data={
                         "access_token": str(token.access_token),
+                        "is_admin": user.is_staff
                     }
                 )
 
