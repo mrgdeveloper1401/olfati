@@ -18,7 +18,6 @@ class IsAuthenticated(BasePermission):
       if request.method in SAFE_METHODS:
          return True
       return bool(request.user.is_authenticated or request.user.is_superuser)
-    
 
 
 #پرمیشن برای چک کردن پرداخت کاربر

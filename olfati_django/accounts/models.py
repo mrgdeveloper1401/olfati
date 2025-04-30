@@ -6,6 +6,7 @@ from django.db import models
 from django.utils import timezone
 
 from core.models import CreateMixin
+from utils.vlaidations import PhoneValidator
 
 
 class UserModel(auth_models.AbstractUser):
@@ -13,7 +14,8 @@ class UserModel(auth_models.AbstractUser):
     study_field = models.CharField(max_length=50, verbose_name="رشته تحصیلی")
     username = models.CharField(max_length=20, unique=True, verbose_name="نام کاربری")
     melli_code = models.CharField(max_length=20, unique=True, verbose_name="کد ملی")
-    phone_number = models.CharField(max_length=12, unique=True, verbose_name="شماره تلفن")
+    phone_number = models.CharField(max_length=12, unique=True, verbose_name="شماره تلفن",
+                                    validators=[PhoneValidator()])
 
     class Meta:
         db_table = "user"
