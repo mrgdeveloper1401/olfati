@@ -88,9 +88,10 @@ class LeitnerBox(CreateMixin, UpdateMixin):
         self.box_number = 1
         self.save()
 
-
+# TODO, when clean migration we must remove field=True in field season
 class LinterFlashCart(CreateMixin, UpdateMixin):
     box = models.PositiveIntegerField(default=1)
+    season = models.ForeignKey(LinterModel, on_delete=models.PROTECT, related_name="linter_flash_cart", null=True)
     question_text = models.CharField(max_length=255, verbose_name="سوال را وارد کنید")
     answers_text = models.TextField(max_length=200, verbose_name="جواب را وارد کنید", blank=True, null=True)
     is_active = models.BooleanField(default=True)

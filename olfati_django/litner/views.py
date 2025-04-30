@@ -139,7 +139,7 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
     #     return super().get_permissions()
 
     def get_queryset(self):
-        return models.LinterFlashCart.objects.only("question_text", "answers_text", "box")
+        return models.LinterFlashCart.objects.only("question_text", "answers_text", "box", "season__title")
 
     def get_serializer_class(self):
         if self.action == "create":

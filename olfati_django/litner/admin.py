@@ -78,11 +78,13 @@ class LeitnerBoxAdmin(admin.ModelAdmin):
 
 @admin.register(models.LinterFlashCart)
 class LinterFlashCartAdmin(admin.ModelAdmin):
-    list_display = ("box", "is_active", "created_at")
+    list_display = ("box", "season", "is_active", "created_at")
     list_editable = ("is_active",)
     list_per_page = 20
+    raw_id_fields = ("season",)
+    list_select_related = ('season',)
 
     def get_queryset(self, request):
         return super().get_queryset(request).only(
-            "is_active", "box", "is_active", "created_at"
+            "is_active", "box", "is_active", "created_at", "season__title"
         )

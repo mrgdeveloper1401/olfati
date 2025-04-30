@@ -2,6 +2,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers, generics, exceptions
 
 from . import models
+from .models import LinterFlashCart, LinterModel
 
 
 class LinterSerializer(serializers.ModelSerializer):
@@ -91,18 +92,27 @@ class UserLinterBoxSerializer(serializers.ModelSerializer):
 class FieldLinterFlashCartSerializer(serializers.Serializer):
     question_text = serializers.CharField()
     answers_text = serializers.CharField()
+    season = serializers.PrimaryKeyRelatedField(
+        queryset=LinterModel.objects.only("title")
+    )
 
 
 class CreateFlashCartSerializer(serializers.Serializer):
     cart = FieldLinterFlashCartSerializer(many=True)
 
     def create(self, validated_data):
+        cart = validated_data.get("cart")
+
+        if not cart:
+            raise exceptions.ValidationError("cart must have data")
+
         lst = [
             models.LinterFlashCart(
                 question_text=i.get("question_text"),
                 answers_text=i.get("answers_text"),
+                season=i.get("season"),
             )
-            for i in validated_data.get("cart")
+            for i in validated_data.get("cart", None)
         ]
         if lst:
             created = models.LinterFlashCart.objects.bulk_create(lst)
@@ -113,7 +123,7 @@ class CreateFlashCartSerializer(serializers.Serializer):
 class LinterFlashCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.LinterFlashCart
-        fields = ("id", "question_text", "answers_text", "box",)
+        fields = ("id", "question_text", "answers_text", "box", "season")
 
 
 class LinterUserAnswerSerializer(serializers.ModelSerializer):
