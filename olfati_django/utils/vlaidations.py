@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-
+from django.utils.translation import gettext_lazy as _
 size = 5
 
 
@@ -23,3 +24,8 @@ class CommonPagination(PageNumberPagination):
             'previous': self.get_previous_link(),
             'data': data,
         })
+
+
+class PhoneValidator(RegexValidator):
+    regex = r'\d'
+    message = _("enter a valid phone number")

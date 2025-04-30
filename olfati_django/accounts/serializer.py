@@ -1,5 +1,6 @@
 from rest_framework import serializers, exceptions
 
+from utils.vlaidations import PhoneValidator
 from .exceptions import UserNotFound
 from .models import OtpModel, UserModel
 
@@ -26,7 +27,7 @@ class OtpSerializers(serializers.ModelSerializer):
 
 
 class RequestOtpSerializer(serializers.Serializer):
-    phone_number = serializers.CharField()
+    phone_number = serializers.CharField(validators=[PhoneValidator()])
 
     def validate(self, attrs):
         phone = attrs.get('phone_number')
