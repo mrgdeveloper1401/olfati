@@ -1,9 +1,15 @@
-import os
 from celery import Celery
+import os
+from decouple import config
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'olfati_django.settings')
+debug_mode = config('DEBUG', default=False, cast=bool)
+
+os.environ.setdefault(
+    'DJANGO_SETTINGS_MODULE',
+    'olfati_django.envs.development' if debug_mode else 'olfati_django.envs.production')
+
 app = Celery('olfati_django')
+
 app.config_from_object('django.conf:settings', namespace='CELERY')
-app.conf.broker_url = 'redis://:k8fO9PqtglIkXRkW@services.irn9.chabokan.net:48473/0'
 
 app.autodiscover_tasks()

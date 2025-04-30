@@ -153,8 +153,6 @@ MERCHANT = "7bd2714c-3674-4566-a4ff-8ec4ed9fac64"
 # مسیر به کلید خصوصی دانلود شده
 FIREBASE_ADMIN_KEY_PATH = os.path.join(BASE_DIR, 'firebase_admin_key.json')
 
-BROKER_URL = 'redis://:k8fO9PqtglIkXRkW@services.irn9.chabokan.net:48473/0'
-CELERY_RESULT_BACKEND = 'redis://:k8fO9PqtglIkXRkW@services.irn9.chabokan.net:48473/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
