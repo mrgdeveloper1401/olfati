@@ -153,4 +153,9 @@ class LinterUserAnswerView(generics.CreateAPIView):
     """
     serializer_class = serializer.CreateLinterUserAnswerSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = models.UserAnswer.objects.all()
+    queryset = models.UserAnswer.objects.only(
+        "user__phone_number",
+        "flash_cart__question_text",
+        "is_correct",
+        "created_at"
+    ).select_related("user", "flash_cart")

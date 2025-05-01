@@ -1,6 +1,7 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers, generics, exceptions
 
+from accounts.models import UserModel
 from . import models
 from .models import LinterFlashCart, LinterModel, UserAnswer
 
@@ -131,6 +132,7 @@ class LinterUserAnswerSerializer(serializers.Serializer):
         queryset=LinterFlashCart.objects.only("id")
     )
     is_correct = serializers.BooleanField()
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
 
 class CreateLinterUserAnswerSerializer(serializers.Serializer):
@@ -143,6 +145,7 @@ class CreateLinterUserAnswerSerializer(serializers.Serializer):
             raise serializers.ValidationError({"message": "answer must have data"})
         lst = [
             UserAnswer(
+                user=self.context['request'].user,
                 flash_cart=i.get("flash_cart"),
                 is_correct=i.get("is_correct"),
             )

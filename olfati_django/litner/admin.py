@@ -34,8 +34,8 @@ class MyLinterClassAdmin(admin.ModelAdmin):
 
 @admin.register(models.UserAnswer)
 class UserAnswerAdmin(admin.ModelAdmin):
-    raw_id_fields = ("flash_cart",)
-    list_select_related = ("flash_cart",)
+    raw_id_fields = ("flash_cart", "user")
+    list_select_related = ("flash_cart", "user")
     list_per_page = 20
     search_help_text = "برای سرچ کردن کافی هست شماره موبایل کاربر رو وارد کنید"
 

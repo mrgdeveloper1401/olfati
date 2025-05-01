@@ -96,6 +96,9 @@ class LinterFlashCart(CreateMixin, UpdateMixin):
     answers_text = models.TextField(max_length=200, verbose_name="جواب را وارد کنید", blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.question_text
+
     @property
     def get_box_number(self):
         return self.box
@@ -105,8 +108,9 @@ class LinterFlashCart(CreateMixin, UpdateMixin):
         verbose_name = _("فلش کارت")
         verbose_name_plural = _("فلش کارت ها")
 
-# TODO, when clean migration we remove field null=True
+# TODO, when clean migration we remove field null=True and field user
 class UserAnswer(CreateMixin, UpdateMixin):
+    user = models.ForeignKey(UserModel, on_delete=models.PROTECT, related_name="user_answer", null=True)
     flash_cart = models.ForeignKey(LinterFlashCart, on_delete=models.PROTECT, related_name="linter_flash_cart",
                                    null=True)
     is_correct = models.BooleanField(default=False)
