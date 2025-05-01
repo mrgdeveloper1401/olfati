@@ -131,13 +131,6 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
     serializer_class = serializer.LinterFlashCartSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-    # def get_permissions(self):
-    #     if self.request.method in ['POST', "PUT", "PATCH", "DELETE"]:
-    #         self.permission_classes = (permissions.IsAdminUser,)
-    #     else:
-    #         self.permission_classes = (permissions.IsAuthenticated,)
-    #     return super().get_permissions()
-
     def get_queryset(self):
         return models.LinterFlashCart.objects.only(
             "question_text", "answers_text", "box", "season__title"
@@ -149,6 +142,14 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             return serializer.CreateFlashCartSerializer
         return super().get_serializer_class()
+
+    def filter_queryset(self, queryset):
+        box_5 = self.request.query_params.get("box_5", None)
+
+        if box_5 and box_5 == '1':
+            return queryset.filter(box=5)
+        else:
+            return queryset
 
 
 class LinterUserAnswerView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
@@ -165,4 +166,4 @@ class LinterUserAnswerView(mixins.CreateModelMixin, mixins.ListModelMixin, mixin
             "flash_cart__question_text",
             "is_correct",
             "created_at"
-        ).select_related("user", "flash_cart").filter(flash_cart_id=self.kwargs['flash_cart_pk'])
+        ).select_related("user", "flash_cart").filter(user=self.request.user)

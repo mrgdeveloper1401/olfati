@@ -150,7 +150,8 @@ class CreateLinterUserAnswerSerializer(serializers.Serializer):
             if i.is_correct:
                 cart.box = min(cart.box + 1, 5)
             else:
-                cart.box = 1
+                if cart.box != 5:
+                    cart.box = 1
             flash_cart_list.append(cart)
         LinterFlashCart.objects.bulk_update(flash_cart_list, ["box"])
 
