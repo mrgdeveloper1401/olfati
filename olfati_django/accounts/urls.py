@@ -16,7 +16,7 @@ urlpatterns = [
     path("profile/linter_class/<int:class_pk>/linter_season/",
          views.ProfileLinterSeasonView.as_view({"get": "list"}),
          name='profile_linter_season'),
-    path("login", views.SendCode.as_view(), name='user_login'),
+    path("signup-login", views.SendCode.as_view(), name='user_login'),
     path("verify-otp", views.VerifyOTPView.as_view(), name='verify_otp'),
     path("create-user", views.UserRegistrationView.as_view(), name="create-user"),
     # Admin:

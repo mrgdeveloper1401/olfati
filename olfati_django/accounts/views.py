@@ -1,3 +1,4 @@
+from django.utils.crypto import get_random_string
 from rest_framework import status, response, views, mixins, viewsets, permissions, generics, decorators
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -29,6 +30,9 @@ class UserRegistrationView(views.APIView):
 
 
 class SendCode(views.APIView):
+    """
+    میتوانید درخواست ثبت نام و لاگین با استفاده از شماره موبایل رو داشته باشد
+    """
     serializer_class = serializer.RequestOtpSerializer
     permission_classes = (NotAuthenticated,)
 
@@ -69,21 +73,21 @@ class VerifyOTPView(views.APIView):
                 "phone_number", "is_active", "is_staff"
             ).last()
 
-            if not user:
-                return response.Response({'message': 'you must create account'}, status.HTTP_404_NOT_FOUND)
-
             if user and user.is_active is False:
-                return response.Response({'message': 'your account is benned'}, status.HTTP_403_FORBIDDEN)
+                return response.Response({'message': 'your account is banned'}, status.HTTP_403_FORBIDDEN)
 
-            else:
-                otp_code.delete()
-                token = RefreshToken.for_user(user)
-                return response.Response(
-                    data={
-                        "access_token": str(token.access_token),
-                        "is_admin": user.is_staff
-                    }
-                )
+            if not user:
+                password = get_random_string(8)
+                user = UserModel.objects.create_user_by_phone(phone_number, password)
+
+            otp_code.delete()
+            token = RefreshToken.for_user(user)
+            return response.Response(
+                data={
+                    "access_token": str(token.access_token),
+                    "is_admin": user.is_staff
+                }
+            )
 
 
 class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,

@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from core.models import CreateMixin
 from utils.vlaidations import PhoneValidator
+from .managers import UserManager
 
 
 class UserModel(auth_models.AbstractUser):
@@ -22,7 +23,7 @@ class UserModel(auth_models.AbstractUser):
         verbose_name = "کاربر"
         verbose_name_plural = "کاربران"
 
-    #objects = UserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ('username', 'melli_code')
