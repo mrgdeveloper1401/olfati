@@ -5,7 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from litner.models import MyLinterClass, LinterModel
 from litner.serializer import MyLinterClassSerializer, LinterSerializer
 
-from utils.sed_code import send_sms_verify
+from .tasks import send_async_otp_code
 from .models import OtpModel, UserModel
 from .permissions import NotAuthenticated
 from . import serializer
@@ -42,7 +42,7 @@ class SendCode(views.APIView):
         phone_number = ser.validated_data.get('phone_number')
 
         otp = OtpModel.objects.create(phone_number=phone_number)
-        send_sms_verify(otp.phone_number, otp.otp_code)
+        send_async_otp_code.apply_async(args=[otp.phone_number, otp.otp_code])
         return response.Response({'message': 'Code Sent!'}, status.HTTP_201_CREATED)
 
 

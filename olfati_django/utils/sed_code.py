@@ -18,12 +18,3 @@ def send_sms_verify(phone, code):
         return response
     except Exception as e:
         raise e
-
-
-def send_successfully_sms(phone, text):
-    params = {
-        'receptor': phone,
-        'template': 'verify',
-        'token': code,
-        'type': 'sms',
-    }

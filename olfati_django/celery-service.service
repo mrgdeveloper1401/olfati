@@ -1,0 +1,14 @@
+[Unit]
+Description=run celery
+After=network.target
+
+[Service]
+User=debian
+Group=debian
+WorkingDirectory=/home/debian/django_project/olfati/olfati_django
+Environment="PATH=/home/debian/django_project/olfati/olfati_django/.venv/bin"
+ExecStart=/home/debian/django_project/olfati/olfati_django/.venv/bin/celery -A  olfati_django.dj_celery worker -l INFO
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
