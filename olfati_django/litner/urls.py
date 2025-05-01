@@ -9,6 +9,7 @@ router = routers.SimpleRouter()
 router.register("class", views.LinterClassViewSet, basename="linter-class")
 router.register("flash_cart", views.LinterFlashCartViewSet, basename="linter_flash_cart")
 router.register("admin_list_linter_class", views.AdminListLinterClassViewSet, basename="admin_list_linter_class")
+router.register("user_answer", views.LinterUserAnswerView, basename="linter_user_answer")
 
 linter_class_router = routers.NestedSimpleRouter(router, "class", lookup="class")
 linter_class_router.register("season", views.LinterSeasonViewSet, basename="linter-season")
@@ -31,7 +32,5 @@ admin_linter_class_router.register(
 )
 
 urlpatterns = ([
-
-    path("answer/", views.LinterUserAnswerView.as_view(), name='linter_flash_cart_answer'),
 ] + router.urls + linter_class_router.urls + linter_session_router.urls + linter_session_router.urls +
                admin_linter_class_router.urls)

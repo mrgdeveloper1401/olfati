@@ -1,5 +1,5 @@
 from django.db.models import Q
-from rest_framework import status, permissions, viewsets, mixins, generics, decorators, response
+from rest_framework import status, permissions, viewsets, mixins, generics, decorators, response, views
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -139,7 +139,11 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
     #     return super().get_permissions()
 
     def get_queryset(self):
-        return models.LinterFlashCart.objects.only("question_text", "answers_text", "box", "season__title")
+        return models.LinterFlashCart.objects.only(
+            "question_text", "answers_text", "box", "season__title"
+        ).select_related("season").filter(
+            season__paid_users=self.request.user
+        )
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -147,15 +151,18 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
 
-class LinterUserAnswerView(generics.CreateAPIView):
+class LinterUserAnswerView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                           viewsets.GenericViewSet):
     """
-    status --> (correct, wrong, skipped)
+    ارسال جواب های کاربران از فلش کارت
     """
     serializer_class = serializer.CreateLinterUserAnswerSerializer
     permission_classes = (permissions.IsAuthenticated,)
-    queryset = models.UserAnswer.objects.only(
-        "user__phone_number",
-        "flash_cart__question_text",
-        "is_correct",
-        "created_at"
-    ).select_related("user", "flash_cart")
+
+    def get_queryset(self):
+        return models.UserAnswer.objects.only(
+            "user__phone_number",
+            "flash_cart__question_text",
+            "is_correct",
+            "created_at"
+        ).select_related("user", "flash_cart").filter(flash_cart_id=self.kwargs['flash_cart_pk'])

@@ -3,7 +3,7 @@ from rest_framework import serializers, generics, exceptions
 
 from accounts.models import UserModel
 from . import models
-from .models import LinterFlashCart, LinterModel, UserAnswer
+from .models import LinterFlashCart, LinterModel, UserAnswer, UserProgress
 
 
 class LinterSerializer(serializers.ModelSerializer):
@@ -122,9 +122,14 @@ class CreateFlashCartSerializer(serializers.Serializer):
 
 
 class LinterFlashCartSerializer(serializers.ModelSerializer):
+    season_title = serializers.SerializerMethodField()
+
     class Meta:
         model = models.LinterFlashCart
-        fields = ("id", "question_text", "answers_text", "box", "season")
+        fields = ("id", "question_text", "answers_text", "box", "season", "season_title")
+
+    def get_season_title(self, obj):
+        return obj.season.title
 
 
 class LinterUserAnswerSerializer(serializers.Serializer):
@@ -137,6 +142,17 @@ class LinterUserAnswerSerializer(serializers.Serializer):
 
 class CreateLinterUserAnswerSerializer(serializers.Serializer):
     answer = LinterUserAnswerSerializer(many=True)
+
+    def update_flashcard_boxes(self, user_answers):
+        flash_cart_list = []
+        for i in user_answers:
+            cart = i.flash_cart
+            if i.is_correct:
+                cart.box = min(cart.box + 1, 5)
+            else:
+                cart.box = 1
+            flash_cart_list.append(cart)
+        LinterFlashCart.objects.bulk_update(flash_cart_list, ["box"])
 
     def create(self, validated_data):
         answer = validated_data.get("answer")
@@ -154,5 +170,7 @@ class CreateLinterUserAnswerSerializer(serializers.Serializer):
 
         if lst:
             UserAnswer.objects.bulk_create(lst)
+            self.update_flashcard_boxes(lst)
 
         return {"answer": lst}
+

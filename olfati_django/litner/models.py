@@ -77,17 +77,6 @@ class LeitnerBox(CreateMixin, UpdateMixin):
         db_table = "linter_box"
         unique_together = ('linter', 'box_number')
 
-    def move_to_next_box(self):
-        """انتقال کارت به خانه بعدی"""
-        if self.box_number < 5:
-            self.box_number += 1
-            self.save()
-
-    def reset_to_first_box(self):
-        """بازگشت کارت به خانه اول"""
-        self.box_number = 1
-        self.save()
-
 # TODO, when clean migration we must remove field=True in field season
 class LinterFlashCart(CreateMixin, UpdateMixin):
     box = models.PositiveIntegerField(default=1)
@@ -127,35 +116,9 @@ class UserProgress(CreateMixin, UpdateMixin, SoftDeleteMixin, ):
     total_questions = models.PositiveIntegerField(verbose_name=_('تعداد کل سوالات'), default=0)
     answered_questions = models.PositiveIntegerField(verbose_name=_('تعداد پاسخ‌های داده شده'), default=0)
     correct_answers = models.PositiveIntegerField(verbose_name=_('تعداد پاسخ‌های صحیح'), default=0)
-    current_box_distribution = models.JSONField(
-        verbose_name=_('توزیع کارت‌ها در خانه‌ها'),
-        default=dict,
-        help_text=_('تعداد کارت‌ها در هر خانه لایتنر')
-    )
-    last_activity = models.DateTimeField(auto_now=True, verbose_name=_('آخرین فعالیت'))
 
     class Meta:
         db_table = 'leitner_user_progress'
         verbose_name = _('پیشرفت کاربر')
         verbose_name_plural = _('پیشرفت‌های کاربران')
         unique_together = ('user', 'linter')
-
-    def update_progress(self, answer):
-        if answer.is_correct:
-            self.correct_answers += 1
-        self.answered_questions += 1
-        self.save()
-        self.update_box_distribution()
-
-    def update_box_distribution(self):
-        boxes = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
-        user_flashcards = LinterFlashCart.objects.filter(
-            box__linter=self.linter,
-            useranswer__user=self.user
-        ).distinct()
-
-        for card in user_flashcards:
-            boxes[card.box.box_number] += 1
-
-        self.current_box_distribution = boxes
-        self.save()
