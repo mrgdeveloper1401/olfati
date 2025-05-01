@@ -2,7 +2,7 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers, generics, exceptions
 
 from . import models
-from .models import LinterFlashCart, LinterModel
+from .models import LinterFlashCart, LinterModel, UserAnswer
 
 
 class LinterSerializer(serializers.ModelSerializer):
@@ -126,7 +126,30 @@ class LinterFlashCartSerializer(serializers.ModelSerializer):
         fields = ("id", "question_text", "answers_text", "box", "season")
 
 
-class LinterUserAnswerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.UserAnswer
-        fields = ("id", "box", "box_number", "answer_text", "status")
+class LinterUserAnswerSerializer(serializers.Serializer):
+    flash_cart = serializers.PrimaryKeyRelatedField(
+        queryset=LinterFlashCart.objects.only("id")
+    )
+    is_correct = serializers.BooleanField()
+
+
+class CreateLinterUserAnswerSerializer(serializers.Serializer):
+    answer = LinterUserAnswerSerializer(many=True)
+
+    def create(self, validated_data):
+        answer = validated_data.get("answer")
+
+        if not answer:
+            raise serializers.ValidationError({"message": "answer must have data"})
+        lst = [
+            UserAnswer(
+                flash_cart=i.get("flash_cart"),
+                is_correct=i.get("is_correct"),
+            )
+            for i in answer
+        ]
+
+        if lst:
+            UserAnswer.objects.bulk_create(lst)
+
+        return {"answer": lst}

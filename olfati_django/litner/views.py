@@ -151,6 +151,6 @@ class LinterUserAnswerView(generics.CreateAPIView):
     """
     status --> (correct, wrong, skipped)
     """
-    serializer_class = serializer.LinterUserAnswerSerializer
+    serializer_class = serializer.CreateLinterUserAnswerSerializer
     permission_classes = (permissions.IsAuthenticated,)
     queryset = models.UserAnswer.objects.all()

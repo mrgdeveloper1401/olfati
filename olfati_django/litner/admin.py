@@ -34,18 +34,10 @@ class MyLinterClassAdmin(admin.ModelAdmin):
 
 @admin.register(models.UserAnswer)
 class UserAnswerAdmin(admin.ModelAdmin):
-    raw_id_fields = ("user", "box")
-    list_select_related = ("user", "box")
+    raw_id_fields = ("flash_cart",)
+    list_select_related = ("flash_cart",)
     list_per_page = 20
-    list_display = ("user", "box", "status", "created_at", "updated_at")
-    list_filter = ("status",)
-    search_fields = ("user__phone_number",)
     search_help_text = "برای سرچ کردن کافی هست شماره موبایل کاربر رو وارد کنید"
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).only(
-            "user__phone_number", "box__question_text", "created_at", "updated_at", "status"
-        )
 
 
 @admin.register(models.UserProgress)
@@ -78,7 +70,7 @@ class LeitnerBoxAdmin(admin.ModelAdmin):
 
 @admin.register(models.LinterFlashCart)
 class LinterFlashCartAdmin(admin.ModelAdmin):
-    list_display = ("box", "season", "is_active", "created_at")
+    list_display = ("box", "id", "season", "is_active", "created_at")
     list_editable = ("is_active",)
     list_per_page = 20
     raw_id_fields = ("season",)

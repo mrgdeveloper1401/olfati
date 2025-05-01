@@ -105,29 +105,16 @@ class LinterFlashCart(CreateMixin, UpdateMixin):
         verbose_name = _("فلش کارت")
         verbose_name_plural = _("فلش کارت ها")
 
-
+# TODO, when clean migration we remove field null=True
 class UserAnswer(CreateMixin, UpdateMixin):
-    class AnswerStatus(models.TextChoices):
-        CORRECT = 'correct',  _('صحیح')
-        WRONG = 'wrong', _('غلط')
-        SKIPPED = 'skipped', _('رد شده')
-
-    user = models.ForeignKey(UserModel, on_delete=models.PROTECT, related_name='leitner_answers')
-    box = models.ForeignKey(LinterFlashCart, on_delete=models.PROTECT, related_name='linter_flash_cart')
-    box_number = models.PositiveSmallIntegerField(help_text=_("شماره باکس"))
-    answer_text = models.TextField(verbose_name=_('پاسخ کاربر'), blank=True, null=True)
-    status = models.CharField(
-        max_length=10,
-        choices=AnswerStatus.choices,
-        verbose_name=_('وضعیت پاسخ'),
-        help_text=_("correct | wrong | skipped")
-    )
+    flash_cart = models.ForeignKey(LinterFlashCart, on_delete=models.PROTECT, related_name="linter_flash_cart",
+                                   null=True)
+    is_correct = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'leitner_user_answers'
         verbose_name = _('پاسخ کاربر')
         verbose_name_plural = _('پاسخ‌های کاربران')
-        unique_together = ('user', 'box')
 
 
 class UserProgress(CreateMixin, UpdateMixin, SoftDeleteMixin, ):
