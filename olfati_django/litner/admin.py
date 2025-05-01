@@ -34,6 +34,7 @@ class MyLinterClassAdmin(admin.ModelAdmin):
 
 @admin.register(models.UserAnswer)
 class UserAnswerAdmin(admin.ModelAdmin):
+    list_display = ("user", "flash_cart", "is_correct")
     raw_id_fields = ("flash_cart", "user")
     list_select_related = ("flash_cart", "user")
     list_per_page = 20
