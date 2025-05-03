@@ -41,7 +41,7 @@ class OtpModel(CreateMixin):
         return f"{self.phone_number} | {self.otp_code}"
 
     def save(self, *args, **kwargs):
-        self.otp_code = random.randint(1, 999999)
+        self.otp_code = random.randint(111111, 999999)
         self.expired_date = timezone.now() + timedelta(minutes=2)
         return super().save(*args, **kwargs)
 
