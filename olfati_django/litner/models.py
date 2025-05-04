@@ -15,7 +15,8 @@ class MyLinterClass(CreateMixin, UpdateMixin, SoftDeleteMixin):
     title = models.CharField(verbose_name="عنوان", max_length=255)
     study_field = models.CharField(max_length=100, verbose_name="رشته تحصیلی")
     cover_image = models.ImageField(upload_to="linter_class/%Y/%m/%d", null=True)
-    author = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="نویسنده")
+    author = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="نویسنده",
+                               limit_choices_to={'is_staff': True})
 
     def __str__(self):
         return self.title

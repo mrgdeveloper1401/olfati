@@ -41,9 +41,9 @@ class UserAnswerAdmin(admin.ModelAdmin):
     search_help_text = "برای سرچ کردن کافی هست شماره موبایل کاربر رو وارد کنید"
 
 
-@admin.register(models.UserProgress)
-class UserProgressAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(models.UserProgress)
+# class UserProgressAdmin(admin.ModelAdmin):
+#     pass
 
 
 @admin.register(models.LeitnerBox)
