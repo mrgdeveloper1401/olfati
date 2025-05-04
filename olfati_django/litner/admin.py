@@ -21,7 +21,7 @@ class LinterModelAdmin(admin.ModelAdmin):
 
 @admin.register(models.MyLinterClass)
 class MyLinterClassAdmin(admin.ModelAdmin):
-    raw_id_fields = ("author",)
+    # raw_id_fields = ("author",)
     list_display = ("author", "id", "title", "created_at")
     list_per_page = 20
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
