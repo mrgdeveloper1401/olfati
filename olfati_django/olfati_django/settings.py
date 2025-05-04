@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # "accounts.check_complete_profile.CheckCompleteProfile",
     # "olfati_django.custom_middlewere.CurrentUserMiddleware"
 ]
 

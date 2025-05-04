@@ -5,18 +5,19 @@ from django.contrib.auth import models as auth_models
 from django.db import models
 from django.utils import timezone
 
-from core.models import CreateMixin
+from core.models import CreateMixin, SoftDeleteMixin
 from utils.vlaidations import PhoneValidator
 from .managers import UserManager
 
 
-class UserModel(auth_models.AbstractUser):
+class UserModel(auth_models.AbstractUser, SoftDeleteMixin):
     # full_name = models.CharField(max_length=35, verbose_name="نام کامل")
     study_field = models.CharField(max_length=50, verbose_name="رشته تحصیلی")
     username = models.CharField(max_length=20, unique=True, verbose_name="نام کاربری", blank=True, null=True)
     melli_code = models.CharField(max_length=20, unique=True, verbose_name="کد ملی", blank=True, null=True)
     phone_number = models.CharField(max_length=12, unique=True, verbose_name="شماره تلفن",
                                     validators=[PhoneValidator()])
+    is_complete = models.BooleanField(default=False)
 
     class Meta:
         db_table = "user"

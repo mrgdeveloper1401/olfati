@@ -77,7 +77,7 @@ class LinterFlashCartAdmin(admin.ModelAdmin):
     list_display = ("box", "id", "season", "is_active", "created_at")
     list_editable = ("is_active",)
     list_per_page = 20
-    raw_id_fields = ("season",)
+    # raw_id_fields = ("season",)
     list_select_related = ('season',)
 
     def get_queryset(self, request):

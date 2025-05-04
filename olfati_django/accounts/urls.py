@@ -7,6 +7,7 @@ from .views import ProfileViewSet
 router = routers.SimpleRouter()
 router.register('profile', ProfileViewSet, basename="user_profile")
 router.register("class_purchase", views.PurchaseLinterClassViewSet, basename="user_class_purchase")
+router.register("profile-user", views.UserProfileView, basename="profile-user")
 
 class_purchase = routers.NestedSimpleRouter(router, "class_purchase", lookup="class_purchase")
 class_purchase.register("season_purchase", views.PurchaseLinterSeasonViewSet, basename="season_purchase")
@@ -18,7 +19,6 @@ urlpatterns = [
          name='profile_linter_season'),
     path("signup-login", views.SendCode.as_view(), name='user_login'),
     path("verify-otp", views.VerifyOTPView.as_view(), name='verify_otp'),
-    path("create-user", views.UserRegistrationView.as_view(), name="create-user"),
     # Admin:
     # path("admin-login", views.AdminLoginView.as_view()),
     # path("admin-reset", views.ResetPasswordView.as_view()),

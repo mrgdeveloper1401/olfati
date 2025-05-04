@@ -11,22 +11,14 @@ from .permissions import NotAuthenticated
 from . import serializer
 
 
-class UserRegistrationView(views.APIView):
+class UserProfileView(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = serializer.UserRegistrationSerializer
-    permission_classes = (NotAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated,)
 
-    def post(self, request, *args, **kwargs):
-        ser = self.serializer_class(data=request.data)
-        ser.is_valid(raise_exception=True)
-        user = ser.save()
-        refresh = RefreshToken.for_user(user)
-        data = {
-            'user_id': user.id,
-            'phone_number': user.phone_number,
-            'access': str(refresh.access_token),
-            'message': 'User registered successfully'
-        }
-        return response.Response(data, status=status.HTTP_201_CREATED)
+    def get_queryset(self):
+        return UserModel.objects.filter(id=self.request.user.id).defer(
+            "is_deleted", "deleted_at"
+        )
 
 
 class SendCode(views.APIView):
@@ -70,7 +62,7 @@ class VerifyOTPView(views.APIView):
 
         else:
             user = UserModel.objects.filter(phone_number=phone_number).only(
-                "phone_number", "is_active", "is_staff"
+                "phone_number", "is_active", "is_staff", 'is_complete'
             ).last()
 
             if user and user.is_active is False:
@@ -85,7 +77,8 @@ class VerifyOTPView(views.APIView):
             return response.Response(
                 data={
                     "access_token": str(token.access_token),
-                    "is_admin": user.is_staff
+                    "is_admin": user.is_staff,
+                    "is_complete": user.is_complete
                 }
             )
 
