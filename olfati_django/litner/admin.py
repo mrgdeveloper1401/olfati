@@ -22,7 +22,7 @@ class LinterModelAdmin(admin.ModelAdmin):
 @admin.register(models.MyLinterClass)
 class MyLinterClassAdmin(admin.ModelAdmin):
     # raw_id_fields = ("author",)
-    list_display = ("author", "id", "title", "created_at")
+    list_display = ("author_full_name", "id", "title", "created_at")
     list_per_page = 20
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
     search_fields = ("title",)
@@ -30,6 +30,9 @@ class MyLinterClassAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).only(
             "author__phone_number", "title", "cover_image", "study_field", "created_at", "updated_at")
+
+    def author_full_name(self, obj):
+        return obj.author.get_full_name()
 
 
 @admin.register(models.UserAnswer)
