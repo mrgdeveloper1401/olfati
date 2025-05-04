@@ -13,7 +13,7 @@ from .managers import UserManager
 class UserModel(auth_models.AbstractUser):
     # full_name = models.CharField(max_length=35, verbose_name="نام کامل")
     study_field = models.CharField(max_length=50, verbose_name="رشته تحصیلی")
-    username = models.CharField(max_length=20, unique=True, verbose_name="نام کاربری")
+    username = models.CharField(max_length=20, unique=True, verbose_name="نام کاربری", blank=True, null=True)
     melli_code = models.CharField(max_length=20, unique=True, verbose_name="کد ملی", blank=True, null=True)
     phone_number = models.CharField(max_length=12, unique=True, verbose_name="شماره تلفن",
                                     validators=[PhoneValidator()])
