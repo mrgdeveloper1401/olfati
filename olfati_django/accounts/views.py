@@ -1,5 +1,6 @@
 from django.utils.crypto import get_random_string
 from rest_framework import status, response, views, mixins, viewsets, permissions, generics, decorators
+from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from litner.models import MyLinterClass, LinterModel
@@ -83,7 +84,7 @@ class VerifyOTPView(views.APIView):
             )
 
 
-class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class ProfileView(views.APIView):
     """
     پروفایل کاربر
     """
@@ -92,8 +93,20 @@ class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Up
     serializer_class = serializer.UserProfileSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
-    def get_queryset(self):
-        return self.queryset.filter(id=self.request.user.id)
+    def get_object(self):
+        return get_object_or_404(self.queryset, id=self.request.user.id)
+
+    def put(self, request, *args, **kwargs):
+        ser = self.serializer_class(self.get_object(), data=request.data)
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return response.Response(ser.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        ser = self.serializer_class(self.get_object(), data=request.data, partial=True)
+        ser.is_valid(raise_exception=True)
+        ser.save()
+        return response.Response(ser.data, status=status.HTTP_200_OK)
 
 
 class ProfileLinterClassView(generics.ListAPIView):
