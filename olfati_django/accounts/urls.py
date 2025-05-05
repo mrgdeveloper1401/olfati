@@ -7,7 +7,6 @@ from .views import ProfileViewSet
 router = routers.SimpleRouter()
 router.register('profile', ProfileViewSet, basename="user_profile")
 router.register("class_purchase", views.PurchaseLinterClassViewSet, basename="user_class_purchase")
-router.register("profile-user", views.UserProfileView, basename="profile-user")
 
 class_purchase = routers.NestedSimpleRouter(router, "class_purchase", lookup="class_purchase")
 class_purchase.register("season_purchase", views.PurchaseLinterSeasonViewSet, basename="season_purchase")
