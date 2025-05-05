@@ -32,7 +32,10 @@ class LinterSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.BooleanField())
     def get_is_paid(self, obj):
-        return obj.paid_users == self.context['request'].user
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.paid_users.filter(id=request.user.id).exists()
+        return False
 
     @extend_schema_field(serializers.IntegerField())
     def get_paid_users_count(self, obj):

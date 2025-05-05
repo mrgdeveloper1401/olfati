@@ -38,7 +38,7 @@ class LinterModel(CreateMixin, UpdateMixin, SoftDeleteMixin):
     # data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
     paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,
                                         verbose_name='دسترسی کاربران')
-    is_sale = models.BooleanField(default=False, help_text="قابل فروش باشد")
+    is_sale = models.BooleanField(default=True, help_text="قابل فروش باشد")
 
     def is_paid_user(self, user):
         return self.paid_users.filter(id=user.id).only("id").exists()
