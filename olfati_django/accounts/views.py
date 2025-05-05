@@ -83,8 +83,7 @@ class VerifyOTPView(views.APIView):
             )
 
 
-class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                     mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
     """
     پروفایل کاربر
     """
@@ -94,10 +93,7 @@ class ProfileViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Up
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            return self.queryset
-        else:
-            return self.queryset.filter(id=self.request.user.id)
+        return self.queryset.filter(id=self.request.user.id)
 
 
 class ProfileLinterClassView(generics.ListAPIView):
