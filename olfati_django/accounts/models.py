@@ -33,7 +33,7 @@ class UserModel(auth_models.AbstractUser, SoftDeleteMixin):
 
     def save(self, *args, **kwargs):
         if self.is_complete is False:
-            if self.username and self.first_name and self.last_name and self.melli_code:
+            if self.username and self.first_name and self.last_name and self.melli_code and self.study_field:
                 self.is_complete = True
         return super().save(*args, **kwargs)
 
