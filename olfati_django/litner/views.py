@@ -127,6 +127,8 @@ class LinterBoxViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
 class LinterFlashCartViewSet(viewsets.ModelViewSet):
     """
     فلش کارت ها
+    for search you can use
+    ?box=(range 1 to 5)
     """
     serializer_class = serializer.LinterFlashCartSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -144,10 +146,10 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def filter_queryset(self, queryset):
-        box_5 = self.request.query_params.get("box_5", None)
+        box = self.request.query_params.get("box", None)
 
-        if box_5 and box_5 == '1':
-            return queryset.filter(box=5)
+        if box:
+            return queryset.filter(box=box)
         else:
             return queryset
 
