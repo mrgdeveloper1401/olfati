@@ -9,7 +9,7 @@ class LinterModelAdmin(admin.ModelAdmin):
     list_display = ("title", "id", "price", "myclass", "myclass_id", "paid_user_count", "is_sale")
     list_select_related = ("myclass", )
     list_editable = ("is_sale",)
-    raw_id_fields = ("myclass",)
+    # raw_id_fields = ("myclass",)
     search_fields = ("title",)
     search_help_text = "برای جست و جو از فیلد (عنوان) استفاده کنید"
 
