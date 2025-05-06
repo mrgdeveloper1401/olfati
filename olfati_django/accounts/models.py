@@ -29,7 +29,7 @@ class UserModel(auth_models.AbstractUser, SoftDeleteMixin):
     REQUIRED_FIELDS = ('username', 'melli_code')
 
     def __str__(self):
-        return self.phone_number
+        return f'{self.phone_number} - {self.get_full_name()}'
 
     def save(self, *args, **kwargs):
         if self.is_complete is False:

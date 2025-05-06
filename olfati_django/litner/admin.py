@@ -30,7 +30,9 @@ class MyLinterClassAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).only(
-            "author__phone_number", "title", "cover_image", "study_field", "created_at", "updated_at")
+            "author__phone_number", "title", "cover_image", "study_field", "created_at", "updated_at",
+            "author__first_name", "author__last_name"
+        )
 
     def author_full_name(self, obj):
         return obj.author.get_full_name()
@@ -59,6 +61,7 @@ class LeitnerBoxAdmin(admin.ModelAdmin):
     list_select_related = ("linter__myclass",)
     search_fields = ("linter__title",)
     search_help_text = "برای سرچ کردن میتوانید از عنوان فصل استفاده کنید"
+
     def get_queryset(self, request):
         return super().get_queryset(request).only(
             "linter__title", "created_at", 'box_number', "linter__myclass__title"

@@ -4,8 +4,8 @@ from django import forms
 
 from accounts.models import UserModel
 from exam.models import ExamModel, QuestionModel, ChoiceModel, KarNameModel, KarNameDBModel, MyExamClass
-from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
-    Myclass
+# from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKarNameModel, MarketHubKarNameDBModel, \
+#     Myclass
 
 
 # @admin.register(UserModel)
@@ -22,14 +22,14 @@ from markethub.models import MarketHubModel, MarketHubQuestionModel, MarketHubKa
 #     )
 
 
-@admin.register(MarketHubModel)
-class UserAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(MarketHubModel)
+# class UserAdmin(admin.ModelAdmin):
+#     pass
 
 
-@admin.register(MarketHubQuestionModel)
-class UserAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(MarketHubQuestionModel)
+# class UserAdmin(admin.ModelAdmin):
+#     pass
 
 
 @admin.register(ExamModel)
@@ -65,17 +65,17 @@ class LogEntryAdmin(admin.ModelAdmin):
     search_fields = ("user__username",)
 
 
-@admin.register(MarketHubKarNameModel)
-class karnameAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(MarketHubKarNameModel)
+# class karnameAdmin(admin.ModelAdmin):
+#     pass
 
 
 # class UserAdmin(admin.ModelAdmin):
 
 
-@admin.register(MarketHubKarNameDBModel)
-class MarketHubKarNameDBModelAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(MarketHubKarNameDBModel)
+# class MarketHubKarNameDBModelAdmin(admin.ModelAdmin):
+#     pass
 
 
 class MyExamClassAdminForm(forms.ModelForm):
@@ -94,6 +94,6 @@ class MyExamClassAdmin(admin.ModelAdmin):
     form = MyExamClassAdminForm
 
 
-@admin.register(Myclass)
-class MyclassAdmin(admin.ModelAdmin):
-    pass
+# @admin.register(Myclass)
+# class MyclassAdmin(admin.ModelAdmin):
+#     pass

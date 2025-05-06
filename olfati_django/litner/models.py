@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from accounts.models import UserModel
 from core.models import CreateMixin, UpdateMixin, SoftDeleteMixin
+from utils.vlaidations import validate_image_size
 
 
 class MyLinterClass(CreateMixin, UpdateMixin, SoftDeleteMixin):
@@ -14,7 +15,7 @@ class MyLinterClass(CreateMixin, UpdateMixin, SoftDeleteMixin):
 
     title = models.CharField(verbose_name="عنوان", max_length=255)
     study_field = models.CharField(max_length=100, verbose_name="رشته تحصیلی")
-    cover_image = models.ImageField(upload_to="linter_class/%Y/%m/%d", null=True)
+    cover_image = models.ImageField(upload_to="linter_class/%Y/%m/%d", null=True, validators=[validate_image_size])
     author = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="نویسنده",
                                limit_choices_to={'is_staff': True})
 
@@ -31,7 +32,7 @@ class LinterModel(CreateMixin, UpdateMixin, SoftDeleteMixin):
 
     title = models.CharField(verbose_name='عنوان', max_length=255)
     description = models.TextField()
-    cover_image = models.ImageField(upload_to="linter_season/%Y/%m/%d", null=True)
+    cover_image = models.ImageField(upload_to="linter_season/%Y/%m/%d", null=True, validators=[validate_image_size])
     price = models.FloatField(verbose_name='قیمیت فصل')
     myclass = models.ForeignKey(MyLinterClass, related_name='linter', on_delete=models.CASCADE,
                                 verbose_name='کلاس مربوطه')
