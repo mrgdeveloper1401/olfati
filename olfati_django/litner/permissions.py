@@ -32,9 +32,13 @@ from rest_framework import permissions
 
 class IsOwnerOrReadOnlyLinterModel(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
         return bool(obj.myclass.author == request.user)
 
 
 class IsOwnerOrReadOnlyLinterClass(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
         return bool(obj.author == request.user)
