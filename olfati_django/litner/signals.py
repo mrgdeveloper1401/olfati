@@ -13,6 +13,6 @@ def create_linter_box(sender, instance, created, **kwargs):
                 linter=instance,
                 box_number=i
             )
-            for i in range(1, 6)
+            for i in range(1, 7)
         ]
         models.LeitnerBox.objects.bulk_create(lst)
