@@ -16,6 +16,7 @@ class UserModelAdmin(BaseUserAdmin):
                     "is_active",
                     "is_staff",
                     "is_superuser",
+                    "is_complete",
                     "groups",
                     "user_permissions",
                 ),
@@ -32,7 +33,7 @@ class UserModelAdmin(BaseUserAdmin):
             },
         ),
     )
-    list_display = ("phone_number", "email", "first_name", "last_name", "is_staff")
+    list_display = ("phone_number", "email", "first_name", "last_name", "is_staff", "is_complete")
     list_filter = ("is_staff", "is_superuser", "is_active")
     search_fields = ("phone_number",)
     ordering = ("-date_joined",)

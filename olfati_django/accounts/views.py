@@ -89,12 +89,16 @@ class ProfileView(views.APIView):
     پروفایل کاربر
     """
     queryset = UserModel.objects.only('first_name', "last_name", 'study_field', 'username', 'melli_code',
-                                      'phone_number', 'email', 'date_joined')
+                                      'phone_number', 'email', 'date_joined', "is_complete")
     serializer_class = serializer.UserProfileSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
         return get_object_or_404(self.queryset, id=self.request.user.id)
+
+    def get(self, request):
+        ser = self.serializer_class(instance=self.get_object())
+        return response.Response(ser.data)
 
     def put(self, request, *args, **kwargs):
         ser = self.serializer_class(self.get_object(), data=request.data)

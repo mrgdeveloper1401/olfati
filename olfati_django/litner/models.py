@@ -103,7 +103,8 @@ class UserAnswer(CreateMixin, UpdateMixin, SoftDeleteMixin):
     user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name="user_answer", null=True)
     flash_cart = models.ForeignKey(LinterFlashCart, on_delete=models.CASCADE, related_name="linter_flash_cart",
                                    null=True)
-    is_correct = models.BooleanField(default=False)
+    is_correct = models.BooleanField(null=True, blank=True,
+                                     help_text="در صورت عدم پاسخ مقدار نال یا همان بی پاسخ ذخیره خواهد شد")
 
     class Meta:
         db_table = 'leitner_user_answers'

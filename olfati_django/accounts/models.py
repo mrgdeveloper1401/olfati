@@ -12,11 +12,10 @@ from .managers import UserManager
 
 class UserModel(auth_models.AbstractUser, SoftDeleteMixin):
     # full_name = models.CharField(max_length=35, verbose_name="نام کامل")
-    study_field = models.CharField(max_length=50, verbose_name="رشته تحصیلی")
-    username = models.CharField(max_length=20, unique=True, verbose_name="نام کاربری", blank=True, null=True)
-    melli_code = models.CharField(max_length=20, unique=True, verbose_name="کد ملی", blank=True, null=True)
-    phone_number = models.CharField(max_length=12, unique=True, verbose_name="شماره تلفن",
-                                    validators=[PhoneValidator()])
+    study_field = models.CharField(max_length=50, blank=True)
+    username = models.CharField(max_length=30, blank=True)
+    melli_code = models.CharField(max_length=20, blank=True)
+    phone_number = models.CharField(max_length=12, unique=True, validators=[PhoneValidator()])
     is_complete = models.BooleanField(default=False)
 
     class Meta:
@@ -31,6 +30,12 @@ class UserModel(auth_models.AbstractUser, SoftDeleteMixin):
 
     def __str__(self):
         return self.phone_number
+
+    def save(self, *args, **kwargs):
+        if self.is_complete is False:
+            if self.username and self.first_name and self.last_name and self.melli_code:
+                self.is_complete = True
+        return super().save(*args, **kwargs)
 
 
 class OtpModel(CreateMixin):
