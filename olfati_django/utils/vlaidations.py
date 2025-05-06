@@ -27,5 +27,5 @@ class CommonPagination(PageNumberPagination):
 
 
 class PhoneValidator(RegexValidator):
-    regex = r'\d'
-    message = _("enter a valid phone number")
+    regex = r'^\d{11}$'
+    message = _("enter a valid phone number, and phone number must be 11 character")
