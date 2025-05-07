@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn instance to serve application
+After=network.target
+
+[Service]
+User=debian
+Group=debian
+WorkingDirectory=/app
+Environment="PATH=/app/venv/bin"
+ExecStart=/app/venv/bin/gunicorn --workers 2 --bind 0.0.0.0:8000 olfati_django.wsgi:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

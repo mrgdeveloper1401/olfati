@@ -1,4 +1,4 @@
-FROM python:3.12.10-alpine
+FROM python:3.12-alpine
 
 WORKDIR /app
 
@@ -12,8 +12,8 @@ RUN pip install --upgrade pip && \
 
 
 RUN adduser -D -H olfati && \
-    chmod +x start.sh && \
-    chown -R olfati:olfati /app
+    chown -R olfati:olfati /app && \
+    chmod +x start.sh
 
 EXPOSE 8000
 

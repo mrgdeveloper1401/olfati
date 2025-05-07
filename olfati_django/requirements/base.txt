@@ -11,4 +11,4 @@ httpx
 kavenegar
 firebase_admin
 boto3==1.35.99
-django-storages
+django-storages[s3]

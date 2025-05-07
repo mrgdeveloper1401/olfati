@@ -3,37 +3,51 @@ from olfati_django.settings import *
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("PRODUCTION_SECRET_KEY", cast=str)
 
+ALLOWED_HOSTS = ''.join(config("PRODUCTION_ALLOWED_HOSTS", cast=list))
+
+# DATABASES = {
+#    'default': {
+#        'ENGINE': "django.db.backends.postgresql",
+#        'NAME': config("DATABASE_NAME", cast=str),
+#        'USER': config("DATABASE_USER", cast=str),
+#        'PASSWORD': config("DATABASE_PASSWORD", cast=str),
+#        'HOST': config("DATABASE_HOST", cast=str),
+#        'PORT':  config("DATABASE_PORT", cast=str),
+#     }
+# }
+
+# docker compose
+# DATABASES = {
+#    'default': {
+#        'ENGINE': "django.db.backends.postgresql",
+#        'NAME': config("COMPOSE_POSTGRES_NAME", cast=str),
+#        'USER': config("COMPOSE_POSTGRES_USER", cast=str),
+#        'PASSWORD': config("COMPOSE_POSTGRES_PASSWORD", cast=str),
+#        'HOST': "olfati_postgres",
+#        'PORT':  5432
+#     }
+# }
+
+# docker run system
 DATABASES = {
    'default': {
        'ENGINE': "django.db.backends.postgresql",
-       'NAME': config("DATABASE_NAME", cast=str),
-       'USER': config("DATABASE_USER", cast=str),
-       'PASSWORD': config("DATABASE_PASSWORD", cast=str),
-       'HOST': config("DATABASE_HOST", cast=str),
-       'PORT':  config("DATABASE_PORT", cast=str),
+       'NAME': config("VPS_POSTGRES_NAME", cast=str),
+       'USER': config("VPS_POSTGRES_USER", cast=str),
+       'PASSWORD': config("VPS_POSTGRES_PASSWORD", cast=str),
+       'HOST': config("VPS_POSTGRES_HOST", cast=str),
+       'PORT':  config("VPS_POSTGRES_PORT", cast=str)
     }
 }
-
-ALLOWED_HOSTS = ['*']
-# ALLOWED_HOSTS = ["https://cartino-app.ir", 'cartino-app.ir']
-
-# CSRF_TRUSTED_ORIGINS = ["https://cartino.chbk.app"]
-
-CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE.insert(0, "corsheaders.middleware.CorsMiddleware",)
 MIDDLEWARE += [
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-    "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-    },
-}
+CORS_ALLOW_ALL_ORIGINS = True
+
+STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedStaticFilesStorage"
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -79,5 +93,10 @@ LOGGING = {
     }
 }
 
+# use system
 CELERY_BROKER_URL = "redis://redis:6380/0"
 CELERY_RESULT_BACKEND = "redis://redis:6380/1"
+
+# docker compose
+# CELERY_BROKER_URL = "redis://olfati_redis:6379/0"
+# CELERY_RESULT_BACKEND = "redis://olfati_redis:6379/1"
