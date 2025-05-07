@@ -124,7 +124,20 @@ class LinterBoxViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewset
     permission_classes = (permissions.IsAuthenticated,)
 
 
-class LinterFlashCartViewSet(viewsets.ModelViewSet):
+class CreateLinterFlashCartViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    serializer_class = serializer.CreateFlashCartSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        return models.LinterFlashCart.objects.only(
+            "question_text", "answers_text", "box", "season__title"
+        ).select_related("season").filter(
+            season__paid_users=self.request.user
+        )
+
+
+class LinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                             mixins.DestroyModelMixin, viewsets.GenericViewSet):
     """
     فلش کارت ها
     for search you can use
@@ -137,13 +150,9 @@ class LinterFlashCartViewSet(viewsets.ModelViewSet):
         return models.LinterFlashCart.objects.only(
             "question_text", "answers_text", "box", "season__title"
         ).select_related("season").filter(
-            season__paid_users=self.request.user
+            season__paid_users=self.request.user,
+            season_id=self.kwargs['season_pk'],
         )
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return serializer.CreateFlashCartSerializer
-        return super().get_serializer_class()
 
     def filter_queryset(self, queryset):
         box = self.request.query_params.get("box", None)
