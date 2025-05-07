@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 import os
+from django.utils.translation import gettext_lazy as _
 
 from core.models import CreateMixin, UpdateMixin, SoftDeleteMixin
 from utils.vlaidations import validate_image_size
@@ -14,24 +15,24 @@ def image_upload_path(instance, filename):
 
 class Image(CreateMixin, UpdateMixin, SoftDeleteMixin):
     user = models.ForeignKey("accounts.UserModel", on_delete=models.PROTECT, related_name="user_upload_user",
-                             null=True)
+                             null=True, verbose_name=_("کاربر"))
     # فیلدهای اصلی
     title = models.CharField(
+        _("عنوان تصویر"),
         max_length=200,
-        verbose_name="عنوان تصویر",
         help_text="عنوان توصیفی برای تصویر (ضروری)"
     )
     image_file = models.ImageField(
         upload_to=image_upload_path,
-        verbose_name="فایل تصویر",
+        verbose_name=_("فایل تصویر"),
         help_text="فرمت‌های پشتیبانی: JPG, PNG, WebP",
         width_field="image_width",
         height_field="image_height",
         validators=[validate_image_size]
     )
-    image_width = models.PositiveIntegerField(editable=False, null=True)
-    image_height = models.PositiveIntegerField(editable=False, null=True)
-    image_url = models.CharField(max_length=255, editable=False, null=True)
+    image_width = models.PositiveIntegerField(_("عرض تصویر"), editable=False, null=True)
+    image_height = models.PositiveIntegerField(_("ارتفاع تصویر"), editable=False, null=True)
+    image_url = models.CharField(_("ادرس عکس"), max_length=255, editable=False, null=True)
 
     # متادیتا
     # alt_text = models.CharField(
@@ -41,8 +42,8 @@ class Image(CreateMixin, UpdateMixin, SoftDeleteMixin):
     #     help_text="برای دسترسی‌پذیری و SEO"
     # )
     caption = models.TextField(
+        _("توضیح تصویر"),
         blank=True,
-        verbose_name="توضیح تصویر",
         help_text="توضیح اختیاری درباره تصویر"
     )
 
@@ -62,14 +63,14 @@ class Image(CreateMixin, UpdateMixin, SoftDeleteMixin):
 
     # مدیریت فایل
     file_size = models.PositiveIntegerField(
+        _("حجم فایل به صورت بایت"),
         editable=False,
         null=True,
-        verbose_name="حجم فایل (بایت)"
     )
     file_format = models.CharField(
+        _("فرمت فایل"),
         max_length=10,
         editable=False,
-        verbose_name="فرمت فایل"
     )
 
     # فعال/غیرفعال

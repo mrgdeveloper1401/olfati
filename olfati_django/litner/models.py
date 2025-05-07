@@ -9,15 +9,24 @@ from utils.vlaidations import validate_image_size
 class MyLinterClass(CreateMixin, UpdateMixin, SoftDeleteMixin):
     class Meta:
         db_table = "linter_class"
-        verbose_name = 'کلاس'
-        verbose_name_plural = 'کلاس ها'
+        verbose_name = _('کلاس')
+        verbose_name_plural = _('کلاس‌ها')
         ordering = ("-created_at",)
 
-    title = models.CharField(verbose_name="عنوان", max_length=255)
-    study_field = models.CharField(max_length=100, verbose_name="رشته تحصیلی")
-    cover_image = models.ImageField(upload_to="linter_class/%Y/%m/%d", null=True, validators=[validate_image_size])
-    author = models.ForeignKey(UserModel, on_delete=models.CASCADE, verbose_name="نویسنده",
-                               limit_choices_to={'is_staff': True})
+    title = models.CharField(verbose_name=_("عنوان"), max_length=255)
+    study_field = models.CharField(max_length=100, verbose_name=_("رشته تحصیلی"))
+    cover_image = models.ImageField(
+        upload_to="linter_class/%Y/%m/%d",
+        null=True,
+        validators=[validate_image_size],
+        verbose_name=_("تصویر کاور")
+    )
+    author = models.ForeignKey(
+        UserModel,
+        on_delete=models.CASCADE,
+        verbose_name=_("نویسنده"),
+        limit_choices_to={'is_staff': True}
+    )
 
     def __str__(self):
         return self.title
@@ -26,26 +35,39 @@ class MyLinterClass(CreateMixin, UpdateMixin, SoftDeleteMixin):
 class LinterModel(CreateMixin, UpdateMixin, SoftDeleteMixin):
     class Meta:
         db_table = "linter_model"
-        verbose_name = 'فصل'
-        verbose_name_plural = 'فصل ها'
+        verbose_name = _('فصل')
+        verbose_name_plural = _('فصل‌ها')
         ordering = ("-created_at",)
 
-    title = models.CharField(verbose_name='عنوان', max_length=255)
-    description = models.TextField()
-    cover_image = models.ImageField(upload_to="linter_season/%Y/%m/%d", null=True, validators=[validate_image_size])
-    price = models.FloatField(verbose_name='قیمیت فصل')
-    myclass = models.ForeignKey(MyLinterClass, related_name='linter', on_delete=models.CASCADE,
-                                verbose_name='کلاس مربوطه')
-    # data_created = models.DateTimeField(auto_now_add=True, verbose_name='زمان ایجاد')
-    paid_users = models.ManyToManyField(UserModel, related_name='paid_litner', blank=True,
-                                        verbose_name='دسترسی کاربران')
-    is_sale = models.BooleanField(default=True, help_text="قابل فروش باشد")
+    title = models.CharField(verbose_name=_('عنوان'), max_length=255)
+    description = models.TextField(verbose_name=_('توضیحات'))
+    cover_image = models.ImageField(
+        upload_to="linter_season/%Y/%m/%d",
+        null=True,
+        validators=[validate_image_size],
+        verbose_name=_("تصویر کاور")
+    )
+    price = models.FloatField(verbose_name=_('قیمت فصل'))
+    myclass = models.ForeignKey(
+        MyLinterClass,
+        related_name='linter',
+        on_delete=models.CASCADE,
+        verbose_name=_('کلاس مربوطه')
+    )
+    paid_users = models.ManyToManyField(
+        UserModel,
+        related_name='paid_litner',
+        blank=True,
+        verbose_name=_('دسترسی کاربران')
+    )
+    is_sale = models.BooleanField(
+        default=True,
+        verbose_name=_("قابل فروش باشد"),
+        help_text=_("قابل فروش باشد")
+    )
 
     def is_paid_user(self, user):
         return self.paid_users.filter(id=user.id).only("id").exists()
-
-    # def have_karname(self, user):
-    #     return LitnerKarNameModel.objects.filter(user=user).only("id").exists()
 
     def is_author(self, user):
         return user.id == self.myclass.author.id
@@ -63,29 +85,54 @@ class LeitnerBox(CreateMixin, UpdateMixin, SoftDeleteMixin):
     مدل برای خانه‌های لایتنر (5 خانه)
     """
     BOX_NUMBERS = (
-        (1, 'خانه ۱'),
-        (2, 'خانه ۲'),
-        (3, 'خانه ۳'),
-        (4, 'خانه ۴'),
-        (5, 'خانه ۵'),
+        (1, _('خانه ۱')),
+        (2, _('خانه ۲')),
+        (3, _('خانه ۳')),
+        (4, _('خانه ۴')),
+        (5, _('خانه ۵')),
     )
-    linter = models.ForeignKey(LinterModel, on_delete=models.CASCADE, verbose_name="فصل", related_name="linter_box")
-    box_number = models.IntegerField(choices=BOX_NUMBERS, default=1, verbose_name="شماره خانه")
-    # is_active = models.BooleanField(default=True)
+    linter = models.ForeignKey(
+        LinterModel,
+        on_delete=models.CASCADE,
+        verbose_name=_("فصل"),
+        related_name="linter_box"
+    )
+    box_number = models.IntegerField(
+        choices=BOX_NUMBERS,
+        default=1,
+        verbose_name=_("شماره خانه")
+    )
 
     class Meta:
         verbose_name = _("باکس")
-        verbose_name_plural = _("باکس ها")
+        verbose_name_plural = _("باکس‌ها")
         db_table = "linter_box"
         unique_together = ('linter', 'box_number')
 
-# TODO, when clean migration we must remove field=True in field season
+
 class LinterFlashCart(CreateMixin, UpdateMixin, SoftDeleteMixin):
-    box = models.PositiveIntegerField(default=1)
-    season = models.ForeignKey(LinterModel, on_delete=models.CASCADE, related_name="linter_flash_cart", null=True)
-    question_text = models.CharField(max_length=255, verbose_name="سوال را وارد کنید")
-    answers_text = models.TextField(max_length=200, verbose_name="جواب را وارد کنید", blank=True, null=True)
-    is_active = models.BooleanField(default=True)
+    box = models.PositiveIntegerField(default=1, verbose_name=_("باکس"))
+    season = models.ForeignKey(
+        LinterModel,
+        on_delete=models.CASCADE,
+        related_name="linter_flash_cart",
+        null=True,
+        verbose_name=_("فصل")
+    )
+    question_text = models.CharField(
+        max_length=255,
+        verbose_name=_("سوال را وارد کنید")
+    )
+    answers_text = models.TextField(
+        max_length=200,
+        verbose_name=_("جواب را وارد کنید"),
+        blank=True,
+        null=True
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("فعال")
+    )
 
     def __str__(self):
         return self.question_text
@@ -97,15 +144,30 @@ class LinterFlashCart(CreateMixin, UpdateMixin, SoftDeleteMixin):
     class Meta:
         db_table = 'linter_flash_cart'
         verbose_name = _("فلش کارت")
-        verbose_name_plural = _("فلش کارت ها")
+        verbose_name_plural = _("فلش کارت‌ها")
 
-# TODO, when clean migration we remove field null=True and field user
+
 class UserAnswer(CreateMixin, UpdateMixin, SoftDeleteMixin):
-    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name="user_answer", null=True)
-    flash_cart = models.ForeignKey(LinterFlashCart, on_delete=models.CASCADE, related_name="linter_flash_cart",
-                                   null=True)
-    is_correct = models.BooleanField(null=True, blank=True,
-                                     help_text="در صورت عدم پاسخ مقدار نال یا همان بی پاسخ ذخیره خواهد شد")
+    user = models.ForeignKey(
+        UserModel,
+        on_delete=models.CASCADE,
+        related_name="user_answer",
+        null=True,
+        verbose_name=_("کاربر")
+    )
+    flash_cart = models.ForeignKey(
+        LinterFlashCart,
+        on_delete=models.CASCADE,
+        related_name="linter_flash_cart",
+        null=True,
+        verbose_name=_("فلش کارت")
+    )
+    is_correct = models.BooleanField(
+        null=True,
+        blank=True,
+        verbose_name=_("پاسخ صحیح"),
+        help_text=_("در صورت عدم پاسخ مقدار نال یا همان بی پاسخ ذخیره خواهد شد")
+    )
 
     class Meta:
         db_table = 'leitner_user_answers'
@@ -114,11 +176,30 @@ class UserAnswer(CreateMixin, UpdateMixin, SoftDeleteMixin):
 
 
 class UserProgress(CreateMixin, UpdateMixin, SoftDeleteMixin):
-    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='leitner_progress')
-    linter = models.ForeignKey(LinterModel, on_delete=models.CASCADE, related_name='user_progress')
-    total_questions = models.PositiveIntegerField(verbose_name=_('تعداد کل سوالات'), default=0)
-    answered_questions = models.PositiveIntegerField(verbose_name=_('تعداد پاسخ‌های داده شده'), default=0)
-    correct_answers = models.PositiveIntegerField(verbose_name=_('تعداد پاسخ‌های صحیح'), default=0)
+    user = models.ForeignKey(
+        UserModel,
+        on_delete=models.CASCADE,
+        related_name='leitner_progress',
+        verbose_name=_("کاربر")
+    )
+    linter = models.ForeignKey(
+        LinterModel,
+        on_delete=models.CASCADE,
+        related_name='user_progress',
+        verbose_name=_("فصل")
+    )
+    total_questions = models.PositiveIntegerField(
+        verbose_name=_('تعداد کل سوالات'),
+        default=0
+    )
+    answered_questions = models.PositiveIntegerField(
+        verbose_name=_('تعداد پاسخ‌های داده شده'),
+        default=0
+    )
+    correct_answers = models.PositiveIntegerField(
+        verbose_name=_('تعداد پاسخ‌های صحیح'),
+        default=0
+    )
 
     class Meta:
         db_table = 'leitner_user_progress'
