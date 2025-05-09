@@ -9,7 +9,7 @@ import logging
 
 from utils.vlaidations import CommonPagination
 from .models import LinterModel
-from .permissions import IsOwnerOrReadOnlyLinterModel, IsOwnerOrReadOnlyLinterClass
+from .permissions import IsOwnerOrReadOnlyLinterModel, IsOwnerOrReadOnlyLinterClass, IsOwnerOrReadOnlyLinterFlashCart
 
 logger = logging.getLogger(__name__)
 permission_error = Response({'اجازه این کار را ندارید.'}, status.HTTP_403_FORBIDDEN)
@@ -78,7 +78,6 @@ class LinterSeasonViewSet(viewsets.ModelViewSet):
     """
     # pagination_class = CommonPagination
     serializer_class = serializer.LinterSerializer
-    permission_classes = (IsOwnerOrReadOnlyLinterModel,)
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -92,6 +91,13 @@ class LinterSeasonViewSet(viewsets.ModelViewSet):
         "title", "price", 'description', 'created_at', "myclass__author__phone_number", "cover_image",
             "created_at", "updated_at", "myclass__author__first_name", "myclass__author__last_name", "is_sale"
     ).select_related("myclass__author",)
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH', "DELETE"]:
+            self.permission_classes = (IsOwnerOrReadOnlyLinterModel,)
+        else:
+            self.permission_classes = (permissions.IsAuthenticated,)
+        return super().get_permissions()
 
 
 class SaleLinterSeasonViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -136,23 +142,23 @@ class CreateLinterFlashCartViewSet(mixins.CreateModelMixin, viewsets.GenericView
         )
 
 
-class LinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
-                             mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class UserLinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
-    فلش کارت ها
-    for search you can use
-    ?box=(range 1 to 5)
+    filter box --> you can wnter url this
+    ?box=(1, 6)
     """
-    serializer_class = serializer.LinterFlashCartSerializer
+    serializer_class = serializer.LinterUserFlashCartSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        return models.LinterFlashCart.objects.only(
-            "question_text", "answers_text", "box", "season__title"
-        ).select_related("season").filter(
-            season__paid_users=self.request.user,
-            season_id=self.kwargs['season_pk'],
-        )
+        return (models.UserLinterFlashCart.objects.filter(user=self.request.user).select_related("flash_cart__season").
+                only(
+            "flash_cart__season__title",
+            "flash_cart__question_text",
+            "flash_cart__answers_text",
+            "box",
+            "user_id",
+        ))
 
     def filter_queryset(self, queryset):
         box = self.request.query_params.get("box", None)
@@ -161,6 +167,20 @@ class LinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, m
             return queryset.filter(box=box)
         else:
             return queryset
+
+
+class LinterFlashCartViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                             mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    serializer_class = serializer.LinterFlashCartSerializer
+    permission_classes = (IsOwnerOrReadOnlyLinterFlashCart,)
+
+    def get_queryset(self):
+        return models.LinterFlashCart.objects.only(
+            "question_text", "answers_text", "season__title"
+        ).select_related("season").filter(
+            season__paid_users=self.request.user,
+            season_id=self.kwargs['season_pk'],
+        )
 
 
 class LinterUserAnswerView(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin,

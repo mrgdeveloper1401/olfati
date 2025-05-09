@@ -10,6 +10,7 @@ router.register("class", views.LinterClassViewSet, basename="linter-class")
 router.register("admin_list_linter_class", views.AdminListLinterClassViewSet, basename="admin_list_linter_class")
 router.register("user_answer", views.LinterUserAnswerView, basename="linter_user_answer")
 router.register("create_flash_cart", views.CreateLinterFlashCartViewSet, basename="create_flash_cart")
+router.register("user_linter_flash_cart", views.UserLinterFlashCartViewSet, basename="user_linter_flash_cart")
 
 linter_class_router = routers.NestedSimpleRouter(router, "class", lookup="class")
 linter_class_router.register("season", views.LinterSeasonViewSet, basename="linter-season")

@@ -34,7 +34,8 @@ class IsOwnerOrReadOnlyLinterModel(permissions.IsAuthenticatedOrReadOnly):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return bool(obj.myclass.author == request.user)
+        else:
+            return bool(obj.myclass.author == request.user)
 
 
 class IsOwnerOrReadOnlyLinterClass(permissions.IsAuthenticatedOrReadOnly):
@@ -42,3 +43,11 @@ class IsOwnerOrReadOnlyLinterClass(permissions.IsAuthenticatedOrReadOnly):
         if request.method in permissions.SAFE_METHODS:
             return True
         return bool(obj.author == request.user)
+
+
+class IsOwnerOrReadOnlyLinterFlashCart(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        else:
+            return bool(obj.season.myclass.author == request.user)

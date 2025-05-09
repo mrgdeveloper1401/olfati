@@ -33,7 +33,7 @@ class UserModelAdmin(BaseUserAdmin):
             },
         ),
     )
-    list_display = ("phone_number", "email", "first_name", "last_name", "is_staff", "is_complete")
+    list_display = ("phone_number", "email", "first_name", "last_name", "is_staff", "is_complete", "date_joined")
     list_filter = ("is_staff", "is_superuser", "is_active")
     search_fields = ("phone_number",)
     ordering = ("-date_joined",)

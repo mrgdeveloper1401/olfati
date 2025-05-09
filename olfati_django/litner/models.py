@@ -90,6 +90,7 @@ class LeitnerBox(CreateMixin, UpdateMixin, SoftDeleteMixin):
         (3, _('خانه ۳')),
         (4, _('خانه ۴')),
         (5, _('خانه ۵')),
+        (6, _('خانه ۶')),
     )
     linter = models.ForeignKey(
         LinterModel,
@@ -111,7 +112,7 @@ class LeitnerBox(CreateMixin, UpdateMixin, SoftDeleteMixin):
 
 
 class LinterFlashCart(CreateMixin, UpdateMixin, SoftDeleteMixin):
-    box = models.PositiveIntegerField(default=1, verbose_name=_("باکس"))
+    # box = models.PositiveIntegerField(default=1, verbose_name=_("باکس"))
     season = models.ForeignKey(
         LinterModel,
         on_delete=models.CASCADE,
@@ -135,16 +136,27 @@ class LinterFlashCart(CreateMixin, UpdateMixin, SoftDeleteMixin):
     )
 
     def __str__(self):
+
         return self.question_text
 
-    @property
-    def get_box_number(self):
-        return self.box
 
     class Meta:
         db_table = 'linter_flash_cart'
         verbose_name = _("فلش کارت")
         verbose_name_plural = _("فلش کارت‌ها")
+
+
+class UserLinterFlashCart(CreateMixin, UpdateMixin, SoftDeleteMixin):
+    flash_cart = models.ForeignKey(LinterFlashCart, on_delete=models.DO_NOTHING, related_name='linter_flash_cart',
+                                   verbose_name=_("فلش کارت"))
+    user = models.ForeignKey(UserModel, on_delete=models.DO_NOTHING, related_name="user_flash_cart",
+                             verbose_name=_("کاربر"))
+    box = models.PositiveSmallIntegerField(_("باکس"), default=1)
+
+    class Meta:
+        db_table = 'user_linter_flash_cart'
+        verbose_name = _("فلش کارت کاربر")
+        verbose_name_plural = _("فلش کارت های کاربر")
 
 
 class UserAnswer(CreateMixin, UpdateMixin, SoftDeleteMixin):
@@ -156,9 +168,9 @@ class UserAnswer(CreateMixin, UpdateMixin, SoftDeleteMixin):
         verbose_name=_("کاربر")
     )
     flash_cart = models.ForeignKey(
-        LinterFlashCart,
+        UserLinterFlashCart,
         on_delete=models.CASCADE,
-        related_name="linter_flash_cart",
+        related_name="user_answer_flash_cart",
         null=True,
         verbose_name=_("فلش کارت")
     )
@@ -173,36 +185,3 @@ class UserAnswer(CreateMixin, UpdateMixin, SoftDeleteMixin):
         db_table = 'leitner_user_answers'
         verbose_name = _('پاسخ کاربر')
         verbose_name_plural = _('پاسخ‌های کاربران')
-
-
-class UserProgress(CreateMixin, UpdateMixin, SoftDeleteMixin):
-    user = models.ForeignKey(
-        UserModel,
-        on_delete=models.CASCADE,
-        related_name='leitner_progress',
-        verbose_name=_("کاربر")
-    )
-    linter = models.ForeignKey(
-        LinterModel,
-        on_delete=models.CASCADE,
-        related_name='user_progress',
-        verbose_name=_("فصل")
-    )
-    total_questions = models.PositiveIntegerField(
-        verbose_name=_('تعداد کل سوالات'),
-        default=0
-    )
-    answered_questions = models.PositiveIntegerField(
-        verbose_name=_('تعداد پاسخ‌های داده شده'),
-        default=0
-    )
-    correct_answers = models.PositiveIntegerField(
-        verbose_name=_('تعداد پاسخ‌های صحیح'),
-        default=0
-    )
-
-    class Meta:
-        db_table = 'leitner_user_progress'
-        verbose_name = _('پیشرفت کاربر')
-        verbose_name_plural = _('پیشرفت‌های کاربران')
-        unique_together = ('user', 'linter')

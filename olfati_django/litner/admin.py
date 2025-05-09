@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
 
 from . import models
 
@@ -78,7 +79,7 @@ class LeitnerBoxAdmin(admin.ModelAdmin):
 
 @admin.register(models.LinterFlashCart)
 class LinterFlashCartAdmin(admin.ModelAdmin):
-    list_display = ("box", "id", "season", "is_active", "created_at")
+    list_display = ("id", "season", "is_active", "created_at")
     list_editable = ("is_active",)
     list_per_page = 20
     # raw_id_fields = ("season",)
@@ -86,5 +87,23 @@ class LinterFlashCartAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).only(
-            "is_active", "box", "is_active", "created_at", "season__title"
+            "is_active", "is_active", "created_at", "season__title"
+        )
+
+
+@admin.register(models.UserLinterFlashCart)
+class UserLinterFlashCartAdmin(admin.ModelAdmin):
+    list_select_related = ("flash_cart", "user",)
+    list_display = ("flash_cart", "user", "box")
+    list_per_page = 20
+    search_fields = ("user__phone_number",)
+    search_help_text = _("برای جست و جو میتوانید از فیلد شماره تلفن استفاده کنید")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).only(
+            "flash_cart__question_text",
+            "user__phone_number",
+            "user__first_name",
+            "user__last_name",
+            "box",
         )

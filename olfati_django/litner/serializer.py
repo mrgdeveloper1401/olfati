@@ -1,9 +1,8 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers, generics, exceptions
 
-from accounts.models import UserModel
 from . import models
-from .models import LinterFlashCart, LinterModel, UserAnswer, UserProgress
+from .models import LinterFlashCart, LinterModel, UserAnswer, UserLinterFlashCart
 
 
 class LinterSerializer(serializers.ModelSerializer):
@@ -81,8 +80,8 @@ class AdminLinterBoxSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         try:
-            generics.get_object_or_404(models.LitnerModel, id=self.context['linter_season_pk'])
-        except models.LitnerModel.DoesNotExist as e:
+            generics.get_object_or_404(models.LinterModel, id=self.context['linter_season_pk'])
+        except models.LinterModel.DoesNotExist as e:
             raise e
         return attrs
 
@@ -129,7 +128,7 @@ class LinterFlashCartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.LinterFlashCart
-        fields = ("id", "question_text", "answers_text", "box", "season", "season_title")
+        fields = ("id", "question_text", "answers_text", "season", "season_title")
 
     def get_season_title(self, obj):
         return obj.season.title
@@ -137,10 +136,9 @@ class LinterFlashCartSerializer(serializers.ModelSerializer):
 
 class LinterUserAnswerSerializer(serializers.Serializer):
     flash_cart = serializers.PrimaryKeyRelatedField(
-        queryset=LinterFlashCart.objects.only("id")
+        queryset=UserLinterFlashCart.objects.only("id")
     )
     is_correct = serializers.BooleanField()
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
 
 class CreateLinterUserAnswerSerializer(serializers.Serializer):
@@ -156,7 +154,7 @@ class CreateLinterUserAnswerSerializer(serializers.Serializer):
                 if cart.box != 6:
                     cart.box = 1
             flash_cart_list.append(cart)
-        LinterFlashCart.objects.bulk_update(flash_cart_list, ["box"])
+        UserLinterFlashCart.objects.bulk_update(flash_cart_list, ["box"])
 
     def create(self, validated_data):
         answer = validated_data.get("answer")
@@ -166,8 +164,8 @@ class CreateLinterUserAnswerSerializer(serializers.Serializer):
         lst = [
             UserAnswer(
                 user=self.context['request'].user,
-                flash_cart=i.get("flash_cart"),
-                is_correct=i.get("is_correct"),
+                flash_cart=i["flash_cart"],
+                is_correct=i["is_correct"],
             )
             for i in answer
         ]
@@ -178,3 +176,25 @@ class CreateLinterUserAnswerSerializer(serializers.Serializer):
 
         return {"answer": lst}
 
+
+class LinterUserFlashCartSerializer(serializers.ModelSerializer):
+    question_text = serializers.SerializerMethodField()
+    answers_text = serializers.SerializerMethodField()
+    season_title = serializers.SerializerMethodField()
+    season = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserLinterFlashCart
+        fields = ("id", "box", "question_text", "answers_text", "season_title", "season")
+
+    def get_question_text(self, obj):
+        return str(obj.flash_cart.question_text)
+
+    def get_answers_text(self, obj):
+        return str(obj.flash_cart.answers_text)
+
+    def get_season_title(self, obj):
+        return str(obj.flash_cart.season.title)
+
+    def get_season(self, obj):
+        return str(obj.flash_cart.season)
