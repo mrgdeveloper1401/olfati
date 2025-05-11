@@ -47,8 +47,6 @@ MIDDLEWARE += [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedStaticFilesStorage"
-
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = True
@@ -100,3 +98,12 @@ CELERY_RESULT_BACKEND = "redis://redis:6380/1"
 # docker compose
 # CELERY_BROKER_URL = "redis://olfati_redis:6379/0"
 # CELERY_RESULT_BACKEND = "redis://olfati_redis:6379/1"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
