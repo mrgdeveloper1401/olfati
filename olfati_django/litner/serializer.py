@@ -138,7 +138,7 @@ class LinterUserAnswerSerializer(serializers.Serializer):
     flash_cart = serializers.PrimaryKeyRelatedField(
         queryset=UserLinterFlashCart.objects.only("id")
     )
-    is_correct = serializers.BooleanField()
+    is_correct = serializers.BooleanField(allow_null=True)
 
 
 class CreateLinterUserAnswerSerializer(serializers.Serializer):

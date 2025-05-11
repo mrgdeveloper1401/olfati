@@ -94,7 +94,7 @@ class LinterFlashCartAdmin(admin.ModelAdmin):
 @admin.register(models.UserLinterFlashCart)
 class UserLinterFlashCartAdmin(admin.ModelAdmin):
     list_select_related = ("flash_cart", "user",)
-    list_display = ("flash_cart", "user", "box")
+    list_display = ("flash_cart", "id", "user", "box")
     list_per_page = 20
     search_fields = ("user__phone_number",)
     search_help_text = _("برای جست و جو میتوانید از فیلد شماره تلفن استفاده کنید")

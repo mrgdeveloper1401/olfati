@@ -176,7 +176,7 @@ class UserAnswer(CreateMixin, UpdateMixin, SoftDeleteMixin):
     )
     is_correct = models.BooleanField(
         null=True,
-        default=None,
+        blank=True,
         verbose_name=_("پاسخ صحیح"),
         help_text=_("در صورت عدم پاسخ مقدار نال یا همان بی پاسخ ذخیره خواهد شد")
     )
